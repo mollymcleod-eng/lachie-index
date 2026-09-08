@@ -63,7 +63,7 @@ em{font-family:var(--serif);font-style:italic;letter-spacing:0}
 
 /* ---------- header ---------- */
 header{padding:26px 0 14px}
-.brand{font-size:40px;line-height:.92}
+.brand{font-size:38px;line-height:.92}
 .brand .tm{font-size:12px;vertical-align:super;font-weight:600;opacity:.5;font-family:var(--body)}
 .place{
   font-family:var(--serif);font-style:italic;font-size:21px;
@@ -102,7 +102,7 @@ header{padding:26px 0 14px}
 .navBtn:hover:not(:disabled){background:var(--ink);color:var(--cream)}
 .navBtn:disabled{opacity:.32;cursor:default}
 .scoreRow{display:flex;align-items:baseline;gap:10px;margin:16px 0 0}
-.score{font-family:var(--disp);font-size:96px;line-height:.82;font-weight:800;letter-spacing:-.055em;font-variant-numeric:tabular-nums}
+.score{font-family:var(--disp);font-size:84px;line-height:.82;font-weight:800;letter-spacing:-.055em;font-variant-numeric:tabular-nums}
 .outof{font-size:20px;font-weight:700;opacity:.55}
 .verdictBadge{
   display:inline-block;margin-top:16px;padding:10px 18px;border-radius:999px;
@@ -273,8 +273,9 @@ footer h3{font-family:var(--disp);font-size:19px;font-weight:800;color:var(--ink
 details summary{cursor:pointer;color:var(--ink);font-size:13.5px;padding:7px 0;font-weight:700}
 .skel{color:var(--mute);text-align:center;padding:34px;font-size:15px;font-weight:600}
 
-@media (max-width:400px){
-  .brand{font-size:33px} .score{font-size:80px} .place{font-size:19px}
+@media (max-width:480px){
+  .brand{font-size:32px} .score{font-size:74px} .place{font-size:18.5px}
+  .panelHead h2{font-size:22px} .outCond{font-size:19px}
   .facNote{min-height:40px}
   .wrap{
     padding-left:max(13px, env(safe-area-inset-left));
