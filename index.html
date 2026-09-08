@@ -3,9 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0c1411">
+<meta name="theme-color" content="#FBF6EC">
 <title>The Lachie Index — Waita River, Haast</title>
 <meta name="description" content="Daily whitebaiting conditions score for the Waita River mouth, Haast — LINZ tides, rain, river level, swell and moon.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Instrument+Serif:ital@1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="favicon-32.png" sizes="32x32">
@@ -14,201 +17,230 @@
 <meta name="apple-mobile-web-app-title" content="Lachie Index">
 <style>
 :root{
-  --bg:#0c1411; --bg2:#111d18; --panel:#16241e; --panel2:#1b2c25;
-  --line:#263a31; --line2:#334c40;
-  --ink:#e9f2ec; --mute:#93a89e; --mute2:#6d8378;
-  --red:#f0524d; --orange:#f5883b; --yellow:#e8c33c; --green:#4fc46b; --electric:#3ddbd0;
-  --shadow:0 2px 14px rgba(0,0,0,.45);
-  --r:14px;
+  --cream:#FBF6EC; --paper:#FFFFFF; --sand:#F3EADA;
+  --ink:#141210; --ink2:#4B453D; --mute:#8C857A; --line:#E8DFCE;
+
+  --butter:#FFD94A; --pink:#FFB0D0; --hotpink:#FF4F9F;
+  --mint:#9FE3C0; --lav:#C6BEF7; --coral:#FF9B85;
+  --sky:#A9DAF2; --peach:#FFCEA1; --olive:#A8C06E;
+
+  --red:#FF8A72; --orange:#FFB35C; --yellow:#FFD94A;
+  --green:#6FD3A0; --electric:#FF4F9F;
+
+  --r:28px; --r2:20px; --r3:14px;
+  --disp:"Bricolage Grotesque",ui-sans-serif,system-ui,"Segoe UI",Roboto,sans-serif;
+  --serif:"Instrument Serif",Georgia,"Times New Roman",serif;
+  --body:"Plus Jakarta Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 body{
-  margin:0; background:var(--bg); color:var(--ink);
-  font:16px/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  margin:0;background:var(--cream);color:var(--ink);
+  font:16px/1.5 var(--body);
   padding-bottom:env(safe-area-inset-bottom);
+  -webkit-font-smoothing:antialiased;
 }
-.wrap{max-width:640px;margin:0 auto;padding:0 14px 56px}
-h1,h2,h3{margin:0;font-weight:650;letter-spacing:-.01em}
+.wrap{max-width:660px;margin:0 auto;padding:0 16px 60px}
+h1,h2,h3{margin:0;font-family:var(--disp);font-weight:800;letter-spacing:-.03em;line-height:1.02}
 button{font:inherit;color:inherit}
+em{font-family:var(--serif);font-style:italic;letter-spacing:0}
 
 /* ---------- header ---------- */
-header{padding:20px 0 12px;text-align:center}
-.brand{font-size:26px;font-weight:800;letter-spacing:-.02em;line-height:1.15}
-.brand .tm{font-size:11px;vertical-align:super;opacity:.55;font-weight:600}
-.place{color:var(--mute);font-size:13px;margin-top:5px}
-.season{
-  display:inline-flex;align-items:center;gap:7px;margin-top:11px;
-  padding:5px 12px;border-radius:999px;font-size:12.5px;font-weight:600;
-  background:var(--panel);border:1px solid var(--line)
+header{padding:26px 0 14px}
+.brand{font-size:40px;line-height:.92}
+.brand .tm{font-size:12px;vertical-align:super;font-weight:600;opacity:.5;font-family:var(--body)}
+.place{
+  font-family:var(--serif);font-style:italic;font-size:21px;
+  color:var(--ink2);margin-top:6px;letter-spacing:0
 }
-.season.open{color:var(--green)}
-.season.shut{color:var(--mute)}
-.dot{width:7px;height:7px;border-radius:50%;background:currentColor;flex:none}
+.season{
+  display:inline-flex;align-items:center;gap:8px;margin-top:14px;
+  padding:8px 15px;border-radius:999px;font-size:13px;font-weight:700;
+  background:var(--ink);color:var(--cream)
+}
+.season.shut{background:var(--sand);color:var(--ink2)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--green);flex:none}
+.season.shut .dot{background:var(--mute)}
 
 /* ---------- hero ---------- */
 .hero{
-  background:linear-gradient(170deg,var(--panel2),var(--panel));
-  border:1px solid var(--line);border-radius:20px;padding:20px 18px;margin-top:14px;
-  box-shadow:var(--shadow);position:relative;overflow:hidden
+  background:var(--tone,var(--butter));border-radius:var(--r);
+  padding:24px 22px;margin-top:16px;position:relative;overflow:hidden;color:var(--ink)
 }
-.hero::after{
-  content:"";position:absolute;inset:0;pointer-events:none;
-  background:radial-gradient(120% 80% at 50% -20%,var(--glow,transparent),transparent 62%);opacity:.5
+.hero>*:not(.blob){position:relative;z-index:1}
+.hero>.blob{
+  position:absolute;right:-52px;top:-58px;width:172px;height:172px;
+  opacity:.34;pointer-events:none;z-index:0
 }
-.hero>*{position:relative}
-.heroTop{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
-.heroDay{font-size:13px;color:var(--mute);font-weight:600}
-.heroNav{display:flex;gap:6px}
+.heroTop{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.heroDay{
+  font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;
+  background:rgba(255,255,255,.55);padding:6px 12px;border-radius:999px
+}
+.heroNav{display:flex;gap:7px}
 .navBtn{
-  background:var(--panel2);border:1px solid var(--line2);border-radius:8px;
-  width:30px;height:28px;cursor:pointer;font-size:14px;line-height:1;
-  display:grid;place-items:center;color:var(--mute)
+  background:rgba(255,255,255,.6);border:0;border-radius:50%;
+  width:34px;height:34px;cursor:pointer;font-size:17px;line-height:1;
+  display:grid;place-items:center;color:var(--ink);font-weight:700
 }
-.navBtn:hover:not(:disabled){color:var(--ink);border-color:var(--mute2)}
-.navBtn:disabled{opacity:.3;cursor:default}
-.scoreRow{display:flex;align-items:flex-end;gap:12px;margin:6px 0 2px}
-.score{font-size:76px;line-height:.88;font-weight:800;letter-spacing:-.045em;font-variant-numeric:tabular-nums}
-.outof{font-size:19px;color:var(--mute);font-weight:600;padding-bottom:10px}
+.navBtn:hover:not(:disabled){background:var(--ink);color:var(--cream)}
+.navBtn:disabled{opacity:.32;cursor:default}
+.scoreRow{display:flex;align-items:baseline;gap:10px;margin:16px 0 0}
+.score{font-family:var(--disp);font-size:96px;line-height:.82;font-weight:800;letter-spacing:-.055em;font-variant-numeric:tabular-nums}
+.outof{font-size:20px;font-weight:700;opacity:.55}
 .verdictBadge{
-  display:inline-block;margin-top:10px;padding:7px 14px;border-radius:999px;
-  font-size:14.5px;font-weight:800;letter-spacing:.03em;
-  background:var(--badgeBg);color:var(--badgeFg);border:1px solid var(--badgeLine)
+  display:inline-block;margin-top:16px;padding:10px 18px;border-radius:999px;
+  font-family:var(--disp);font-size:15px;font-weight:800;letter-spacing:-.01em;
+  background:var(--ink);color:var(--cream)
 }
-.quote{
-  margin-top:15px;padding:13px 15px;background:rgba(0,0,0,.24);
-  border-left:3px solid var(--accent,var(--green));border-radius:0 10px 10px 0
-}
-.quote .who{font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--mute2);font-weight:700}
-.quote p{margin:5px 0 0;font-size:15.5px;line-height:1.45}
+.quote{margin-top:16px;padding:16px 18px;background:rgba(255,255,255,.72);border-radius:var(--r2)}
+.quote .who{font-size:10.5px;text-transform:uppercase;letter-spacing:.14em;font-weight:800;opacity:.5}
+.quote p{margin:7px 0 0;font-size:16.5px;line-height:1.42;font-weight:500}
 
-/* ---------- generic panel ---------- */
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:15px;margin-top:14px}
-.panelHead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:11px}
-.panelHead h2{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--mute)}
-.hint{font-size:12px;color:var(--mute2)}
+/* ---------- panels ---------- */
+.panel{background:var(--paper);border-radius:var(--r);padding:20px;margin-top:16px}
+.panelHead{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:14px}
+.panelHead h2{font-size:24px}
+.hint{font-size:12px;color:var(--mute);font-weight:600}
 
 /* ---------- windows ---------- */
 .win{
-  display:flex;align-items:center;gap:13px;padding:12px;border-radius:11px;
-  background:var(--panel2);border:1px solid var(--line);margin-bottom:9px
+  display:flex;align-items:center;gap:14px;padding:14px;border-radius:var(--r2);
+  background:var(--sand);margin-bottom:10px
 }
 .win:last-child{margin-bottom:0}
-.win.best{border-color:var(--accent);background:linear-gradient(90deg,rgba(79,196,107,.09),var(--panel2))}
+.win.best{background:var(--tone,var(--mint))}
 .winScore{
-  font-size:23px;font-weight:800;width:52px;flex:none;text-align:center;
-  font-variant-numeric:tabular-nums;line-height:1.05
+  font-family:var(--disp);font-size:26px;font-weight:800;width:58px;flex:none;text-align:center;
+  font-variant-numeric:tabular-nums;line-height:1;letter-spacing:-.04em
 }
-.winScore small{display:block;font-size:9.5px;font-weight:700;letter-spacing:.06em;color:var(--mute2);text-transform:uppercase}
+.winScore small{display:block;font-size:9.5px;font-weight:700;letter-spacing:.08em;opacity:.5;font-family:var(--body);margin-top:3px}
 .winBody{flex:1;min-width:0}
-.winTime{font-size:17px;font-weight:700;font-variant-numeric:tabular-nums}
-.winMeta{font-size:12.5px;color:var(--mute);margin-top:2px}
+.winTime{font-family:var(--disp);font-size:21px;font-weight:800;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.winMeta{font-size:12.5px;color:var(--ink2);margin-top:3px;font-weight:500}
 .winTag{
-  font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
-  padding:3px 8px;border-radius:999px;flex:none
+  font-size:10px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;
+  padding:5px 11px;border-radius:999px;flex:none;background:var(--ink);color:var(--cream)
 }
 
-/* ---------- factors ---------- */
-.fac{display:grid;grid-template-columns:26px 1fr 42px;gap:11px;align-items:center;padding:8px 0;cursor:pointer}
-.fac+.fac{border-top:1px solid var(--line)}
-.facIcon{font-size:17px;text-align:center}
-.facName{font-size:14px;font-weight:600}
-.facNote{font-size:12px;color:var(--mute);margin-top:2px}
-.facBarWrap{height:6px;background:rgba(0,0,0,.35);border-radius:99px;overflow:hidden;margin-top:6px}
-.facBar{height:100%;border-radius:99px;transition:width .35s ease}
-.facVal{font-size:16px;font-weight:800;text-align:right;font-variant-numeric:tabular-nums}
-.facVal small{font-size:10px;color:var(--mute2);font-weight:600}
+/* ---------- factor tiles ---------- */
+.facGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fac{background:var(--tile);border-radius:var(--r2);padding:15px 15px 16px;cursor:default}
+.facTop{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.facIcon{font-size:20px;line-height:1}
+.facVal{font-family:var(--disp);font-size:26px;font-weight:800;letter-spacing:-.045em;font-variant-numeric:tabular-nums;line-height:1}
+.facVal small{font-size:11px;font-weight:700;opacity:.45;font-family:var(--body)}
+.facName{font-family:var(--disp);font-size:17px;font-weight:800;margin-top:11px;letter-spacing:-.02em}
+.facNote{font-size:11.5px;color:var(--ink2);margin-top:3px;line-height:1.4;font-weight:500;min-height:32px}
+.facBarWrap{height:5px;background:rgba(20,18,16,.14);border-radius:99px;overflow:hidden;margin-top:9px}
+.facBar{display:block;height:100%;border-radius:99px;background:var(--ink);transition:width .4s ease}
 .penalty{
-  margin-top:11px;padding:9px 12px;border-radius:10px;font-size:13px;
-  background:rgba(240,82,77,.11);border:1px solid rgba(240,82,77,.32);color:#ffb3b0
+  grid-column:1/-1;margin-top:2px;padding:13px 15px;border-radius:var(--r2);font-size:13.5px;
+  background:var(--coral);font-weight:600;line-height:1.45
 }
-.penalty b{color:var(--red)}
+.penalty b{font-family:var(--disp);font-weight:800}
 
 /* ---------- outlook ---------- */
-.strip{display:flex;gap:8px;overflow-x:auto;padding:2px 0 6px;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+.strip{display:flex;gap:9px;overflow-x:auto;padding:2px 0 8px;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
 .dayCard{
-  flex:none;width:66px;padding:10px 6px;border-radius:11px;text-align:center;cursor:pointer;
-  background:var(--panel2);border:1px solid var(--line);transition:transform .12s
+  flex:none;width:76px;padding:13px 8px;border-radius:var(--r2);text-align:center;cursor:pointer;
+  background:var(--tone);transition:transform .14s
 }
-.dayCard:hover{transform:translateY(-2px)}
-.dayCard.sel{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink) inset}
-.dayCard.out{opacity:.4}
-.dcDow{font-size:10.5px;color:var(--mute);font-weight:700;text-transform:uppercase;letter-spacing:.05em}
-.dcDate{font-size:10px;color:var(--mute2);margin-top:1px}
-.dcScore{font-size:21px;font-weight:800;margin:5px 0 3px;font-variant-numeric:tabular-nums}
-.dcBar{height:4px;border-radius:99px;background:rgba(0,0,0,.35);overflow:hidden}
-.dcBar>i{display:block;height:100%;border-radius:99px}
-.dcTime{font-size:9.5px;color:var(--mute2);margin-top:5px;font-variant-numeric:tabular-nums}
+.dayCard:hover{transform:translateY(-3px)}
+.dayCard.sel{box-shadow:0 0 0 3px var(--ink)}
+.dayCard.out{opacity:.42}
+.dcDow{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.08em}
+.dcDate{font-size:10px;opacity:.55;margin-top:1px;font-weight:600}
+.dcScore{font-family:var(--disp);font-size:25px;font-weight:800;margin:7px 0 5px;letter-spacing:-.045em;font-variant-numeric:tabular-nums}
+.dcBar{height:4px;border-radius:99px;background:rgba(20,18,16,.16);overflow:hidden}
+.dcBar>i{display:block;height:100%;border-radius:99px;background:var(--ink)}
+.dcTime{font-size:10px;opacity:.6;margin-top:6px;font-variant-numeric:tabular-nums;font-weight:700}
 
-/* ---------- log ---------- */
-.field{margin-bottom:11px}
-.field label{display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--mute);font-weight:700;margin-bottom:5px}
+/* ---------- forms / log ---------- */
+.field{margin-bottom:14px}
+.field label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.11em;color:var(--mute);font-weight:800;margin-bottom:7px}
 input,select,textarea{
-  width:100%;background:var(--bg2);border:1px solid var(--line2);border-radius:9px;
-  padding:10px;color:var(--ink);font:inherit;font-size:15px
+  width:100%;background:var(--cream);border:2px solid var(--line);border-radius:var(--r3);
+  padding:12px;color:var(--ink);font:inherit;font-size:15px;font-weight:500
 }
-textarea{resize:vertical;min-height:56px}
-input:focus,select,textarea:focus{outline:2px solid var(--green);outline-offset:-1px}
-.catchBtns{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+textarea{resize:vertical;min-height:62px}
+input:focus,textarea:focus{outline:0;border-color:var(--ink)}
+.catchBtns{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}
 .cb{
-  padding:9px 3px;border-radius:9px;background:var(--bg2);border:1px solid var(--line2);
-  cursor:pointer;text-align:center;font-size:10.5px;font-weight:700;line-height:1.25;color:var(--mute)
+  padding:11px 3px;border-radius:var(--r3);background:var(--cream);border:2px solid var(--line);
+  cursor:pointer;text-align:center;font-size:10.5px;font-weight:700;line-height:1.25;color:var(--ink2)
 }
-.cb .em{display:block;font-size:17px;margin-bottom:3px}
-.cb.on{background:var(--green);color:#06120a;border-color:var(--green)}
+.cb .em{display:block;font-size:19px;margin-bottom:4px}
+.cb.on{background:var(--butter);border-color:var(--ink);color:var(--ink)}
 .btn{
-  width:100%;padding:12px;border-radius:10px;border:1px solid var(--green);
-  background:var(--green);color:#06120a;font-weight:800;cursor:pointer;font-size:15px
+  width:100%;padding:15px;border-radius:999px;border:0;
+  background:var(--ink);color:var(--cream);font-family:var(--disp);font-weight:800;font-size:16px;
+  cursor:pointer;letter-spacing:-.01em
 }
-.btn:hover{filter:brightness(1.08)}
-.btn.ghost{background:transparent;color:var(--mute);border-color:var(--line2);font-weight:600}
-.btn.ghost:hover{color:var(--ink);border-color:var(--mute2);filter:none}
-.btnRow{display:flex;gap:8px;margin-top:10px}
-.entry{display:flex;gap:11px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line)}
+.btn:hover{background:var(--hotpink)}
+.btn.ghost{background:transparent;color:var(--ink2);border:2px solid var(--line);font-size:14px}
+.btn.ghost:hover{background:var(--sand);color:var(--ink);border-color:var(--ink)}
+.btnRow{display:flex;gap:9px;margin-top:11px}
+.entry{display:flex;gap:12px;align-items:flex-start;padding:13px 0;border-top:2px solid var(--line)}
 .entry:first-child{border-top:0}
-.entryEm{font-size:19px;flex:none;width:24px;text-align:center}
+.entryEm{font-size:21px;flex:none;width:26px;text-align:center}
 .entryBody{flex:1;min-width:0}
-.entryTop{display:flex;justify-content:space-between;gap:8px;font-size:13.5px;font-weight:600}
-.entryMeta{font-size:12px;color:var(--mute);margin-top:2px}
-.entryNote{font-size:12.5px;color:var(--mute);margin-top:4px;font-style:italic}
-.del{background:none;border:0;color:var(--mute2);cursor:pointer;font-size:15px;padding:0 3px;flex:none}
-.del:hover{color:var(--red)}
-.empty{text-align:center;color:var(--mute2);font-size:13.5px;padding:16px 8px;line-height:1.55}
+.entryTop{display:flex;justify-content:space-between;gap:8px;font-size:14px;font-weight:700}
+.entryTop b{font-family:var(--disp);font-weight:800;font-size:16px;letter-spacing:-.02em}
+.entryScore{
+  font-family:var(--disp);font-weight:800;font-size:14px;letter-spacing:-.03em;
+  padding:3px 11px;border-radius:999px;flex:none;font-variant-numeric:tabular-nums
+}
+.entryMeta{font-size:12px;color:var(--mute);margin-top:3px;font-weight:500}
+.entryNote{font-family:var(--serif);font-style:italic;font-size:14.5px;color:var(--ink2);margin-top:5px}
+.del{background:none;border:0;color:var(--mute);cursor:pointer;font-size:16px;padding:0 4px;flex:none}
+.del:hover{color:var(--hotpink)}
+.empty{
+  text-align:center;color:var(--ink2);font-size:14px;padding:22px 10px;line-height:1.6;
+  background:var(--sand);border-radius:var(--r2);font-weight:500
+}
 
 /* ---------- calibration ---------- */
-.calRow{display:flex;align-items:center;gap:10px;padding:7px 0;font-size:13px}
-.calRow+.calRow{border-top:1px solid var(--line)}
-.calLabel{width:96px;flex:none;color:var(--mute);font-size:12.5px}
-.calBarWrap{display:block;flex:1;height:16px;background:rgba(0,0,0,.3);border-radius:5px;overflow:hidden;position:relative}
-.calBar{display:block;height:100%;border-radius:5px}
-.calNum{width:56px;text-align:right;font-variant-numeric:tabular-nums;font-weight:700;font-size:13px;flex:none}
+.calRow{display:flex;align-items:center;gap:11px;padding:9px 0}
+.calRow+.calRow{border-top:2px solid var(--line)}
+.calLabel{width:104px;flex:none;font-size:12.5px;font-weight:700}
+.calBarWrap{display:block;flex:1;height:20px;background:var(--sand);border-radius:99px;overflow:hidden}
+.calBar{display:block;height:100%;border-radius:99px}
+.calNum{width:60px;text-align:right;font-family:var(--disp);font-variant-numeric:tabular-nums;font-weight:800;font-size:16px;flex:none;letter-spacing:-.03em}
+.calNum span{font-family:var(--body);font-size:11px;font-weight:600;color:var(--mute)}
 .insight{
-  margin-top:12px;padding:11px 13px;border-radius:10px;font-size:13.5px;line-height:1.5;
-  background:rgba(61,219,208,.08);border:1px solid rgba(61,219,208,.26)
+  margin-top:14px;padding:15px 17px;border-radius:var(--r2);font-size:14px;line-height:1.55;
+  background:var(--lav);font-weight:500
 }
-.insight b{color:var(--electric)}
+.insight b{font-family:var(--disp);font-weight:800}
 
 /* ---------- status / footer ---------- */
 .status{
-  display:flex;align-items:center;gap:8px;justify-content:center;
-  font-size:12px;color:var(--mute2);margin-top:14px;text-align:center;flex-wrap:wrap
+  display:flex;align-items:center;gap:9px;justify-content:center;flex-wrap:wrap;
+  font-size:12.5px;color:var(--mute);margin-top:16px;text-align:center;font-weight:600
 }
-.status.warn{color:var(--orange)}
-.status button{background:none;border:0;color:var(--mute);text-decoration:underline;cursor:pointer;font-size:12px;padding:0}
-footer{margin-top:22px;padding-top:16px;border-top:1px solid var(--line);font-size:11.5px;color:var(--mute2);line-height:1.65}
-footer a{color:var(--mute);text-decoration:underline}
-footer h3{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--mute);margin-bottom:6px}
-details summary{cursor:pointer;color:var(--mute);font-size:12.5px;padding:5px 0}
-.skel{color:var(--mute2);text-align:center;padding:22px;font-size:14px}
-@media (max-width:380px){ .score{font-size:62px} .brand{font-size:22px} }
+.status.warn{
+  color:var(--ink);background:var(--peach);padding:11px 15px;border-radius:999px;font-weight:600
+}
+.status button{background:none;border:0;color:inherit;text-decoration:underline;cursor:pointer;font-size:12.5px;padding:0;font-weight:700}
+footer{margin-top:26px;padding-top:20px;border-top:2px solid var(--line);font-size:12.5px;color:var(--ink2);line-height:1.7}
+footer a{color:var(--ink);text-decoration:underline}
+footer h3{font-family:var(--disp);font-size:19px;font-weight:800;color:var(--ink);margin-bottom:8px;letter-spacing:-.02em}
+details summary{cursor:pointer;color:var(--ink);font-size:13.5px;padding:7px 0;font-weight:700}
+.skel{color:var(--mute);text-align:center;padding:34px;font-size:15px;font-weight:600}
+
+@media (max-width:400px){
+  .brand{font-size:33px} .score{font-size:80px} .place{font-size:19px}
+  .facNote{min-height:40px} .wrap{padding:0 13px 56px}
+}
 </style>
 </head>
 <body>
 <div class="wrap">
 
 <header>
-  <h1 class="brand">🐟 THE LACHIE INDEX<span class="tm">™</span></h1>
-  <div class="place">Waita River mouth · Haast · South Westland</div>
+  <h1 class="brand">The Lachie Index<span class="tm">™</span></h1>
+  <div class="place">whitebait at the Waita mouth, Haast</div>
   <div class="season" id="season"><span class="dot"></span><span id="seasonTxt">…</span></div>
 </header>
 
@@ -300,20 +332,20 @@ const TIDE_RAW = "{\"start\":\"2026-01-01\",\"days\":\"219:3,596:20,968:2,1345:2
 /* --- scoring weights (sum to 1) -------------------------------------- */
 const W = { tide:.30, fresh:.20, river:.20, cloud:.10, moon:.10, sea:.10 };
 const FACTORS = [
-  { k:"tide",  icon:"🌊", name:"Tide"     },
-  { k:"fresh", icon:"🌧️", name:"Fresh"    },
-  { k:"river", icon:"📈", name:"River"    },
-  { k:"cloud", icon:"☁️", name:"Weather"  },
-  { k:"sea",   icon:"🌬️", name:"Wind / Sea" },
-  { k:"moon",  icon:"🌙", name:"Moon"     }
+  { k:"tide",  icon:"🌊", name:"Tide",        tile:"var(--sky)"    },
+  { k:"fresh", icon:"🌧️", name:"Fresh",       tile:"var(--lav)"    },
+  { k:"river", icon:"📈", name:"River",       tile:"var(--mint)"   },
+  { k:"cloud", icon:"☁️", name:"Weather",     tile:"var(--butter)" },
+  { k:"sea",   icon:"🌬️", name:"Wind / Sea",  tile:"var(--peach)"  },
+  { k:"moon",  icon:"🌙", name:"Moon",        tile:"var(--pink)"   }
 ];
 
 const BANDS = [
-  { min:9,   label:"CODE WHITEBAIT",   emoji:"🚨", col:"var(--electric)", bg:"rgba(61,219,208,.14)",  line:"rgba(61,219,208,.5)"  },
-  { min:7,   label:"GET THE NET",      emoji:"🟢", col:"var(--green)",    bg:"rgba(79,196,107,.14)",  line:"rgba(79,196,107,.5)"  },
-  { min:5,   label:"WORTH A LOOK",     emoji:"🟡", col:"var(--yellow)",   bg:"rgba(232,195,60,.14)",  line:"rgba(232,195,60,.5)"  },
-  { min:3,   label:"YOU'D HAVE TO BE KEEN", emoji:"🟠", col:"var(--orange)", bg:"rgba(245,136,59,.14)", line:"rgba(245,136,59,.5)" },
-  { min:-99, label:"DON'T BOTHER",     emoji:"🔴", col:"var(--red)",      bg:"rgba(240,82,77,.14)",   line:"rgba(240,82,77,.5)"   }
+  { min:9,   label:"CODE WHITEBAIT",         emoji:"🚨", col:"var(--electric)" },
+  { min:7,   label:"GET THE NET",            emoji:"🟢", col:"var(--green)"    },
+  { min:5,   label:"WORTH A LOOK",           emoji:"🟡", col:"var(--yellow)"   },
+  { min:3,   label:"YOU'D HAVE TO BE KEEN",  emoji:"🟠", col:"var(--orange)"   },
+  { min:-99, label:"DON'T BOTHER",           emoji:"🔴", col:"var(--red)"      }
 ];
 const band = s => BANDS.find(b => s >= b.min);
 
@@ -715,7 +747,10 @@ function render(){
   const i = DAYS.findIndex(d => d.date === day.date);
 
   let html = `
-  <section class="hero" style="--glow:${b.bg};--badgeBg:${b.bg};--badgeFg:${b.col};--badgeLine:${b.line};--accent:${b.col}">
+  <section class="hero" style="--tone:${b.col}">
+    <svg class="blob" viewBox="0 0 200 200" aria-hidden="true"><g transform="translate(100,100)">
+      <path fill="#fff" d="M45,-58C58,-46,66,-29,69,-11C72,7,70,26,60,40C50,54,32,63,12,68C-8,73,-30,74,-47,65C-64,56,-76,37,-79,17C-82,-3,-76,-24,-64,-40C-52,-56,-34,-67,-15,-70C4,-73,25,-70,45,-58Z"/>
+    </g></svg>
     <div class="heroTop">
       <span class="heroDay">${label} · ${dowOf(day.date)} ${+day.date.slice(8)} ${["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][+day.date.slice(5,7)-1]}</span>
       <span class="heroNav">
@@ -724,7 +759,7 @@ function render(){
       </span>
     </div>
     <div class="scoreRow">
-      <span class="score" style="color:${b.col}">${day.score == null ? "—" : day.score.toFixed(1)}</span>
+      <span class="score">${day.score == null ? "—" : day.score.toFixed(1)}</span>
       <span class="outof">/ 10</span>
     </div>
     <div class="verdictBadge">${b.emoji} ${b.label}</div>
@@ -741,13 +776,13 @@ function render(){
     day.windows.slice().sort((a,b)=>a.start-b.start).forEach(w => {
       const wb = band(w.score);
       const best = w === day.best;
-      html += `<div class="win ${best?"best":""}" style="--accent:${wb.col}">
-        <div class="winScore" style="color:${wb.col}">${w.score.toFixed(1)}<small>/10</small></div>
+      html += `<div class="win ${best?"best":""}" style="--tone:${wb.col}">
+        <div class="winScore">${w.score.toFixed(1)}<small>/10</small></div>
         <div class="winBody">
           <div class="winTime">${hhmm(w.start)} – ${hhmm(w.end)}</div>
           <div class="winMeta">High water ${hhmm(w.htMin)} · ${w.htH.toFixed(1)} m · ${w.range.toFixed(1)} m range</div>
         </div>
-        ${best && day.windows.length>1 ? `<span class="winTag" style="background:${wb.bg};color:${wb.col}">Pick</span>` : ""}
+        ${best && day.windows.length>1 ? `<span class="winTag">Pick</span>` : ""}
       </div>`;
     });
     html += `</section>`;
@@ -759,25 +794,26 @@ function render(){
   const w = day.best;
   if (w){
     html += `<section class="panel"><div class="panelHead"><h2>The breakdown</h2>
-      <span class="hint">best window</span></div>`;
+      <span class="hint">best window</span></div><div class="facGrid">`;
     FACTORS.forEach(ft => {
       const v = w.f[ft.k];
       if (v == null){
-        html += `<div class="fac"><div class="facIcon">${ft.icon}</div>
-          <div><div class="facName">${ft.name}</div><div class="facNote">no data — needs signal</div></div>
-          <div class="facVal" style="color:var(--mute2)">–</div></div>`;
+        html += `<div class="fac" style="--tile:var(--sand)">
+          <div class="facTop"><span class="facIcon">${ft.icon}</span><span class="facVal">–</span></div>
+          <div class="facName">${ft.name}</div>
+          <div class="facNote">no data — needs signal</div></div>`;
         return;
       }
-      html += `<div class="fac"><div class="facIcon">${ft.icon}</div>
-        <div>
-          <div class="facName">${ft.name}</div>
-          <div class="facNote">${w.notes[ft.k] || ""}</div>
-          <div class="facBarWrap"><div class="facBar" style="width:${v*10}%;background:${colFor(v)}"></div></div>
-        </div>
-        <div class="facVal" style="color:${colFor(v)}">${v.toFixed(1)}<small>/10</small></div></div>`;
+      html += `<div class="fac" style="--tile:${ft.tile}">
+        <div class="facTop"><span class="facIcon">${ft.icon}</span>
+          <span class="facVal">${v.toFixed(1)}<small>/10</small></span></div>
+        <div class="facName">${ft.name}</div>
+        <div class="facNote">${w.notes[ft.k] || ""}</div>
+        <div class="facBarWrap"><div class="facBar" style="width:${v*10}%"></div></div>
+      </div>`;
     });
     w.pen.forEach(p => { html += `<div class="penalty"><b>−${p.n}</b> &nbsp;${p.why}</div>`; });
-    html += `</section>`;
+    html += `</div></section>`;
   }
 
   /* --- outlook --- */
@@ -785,11 +821,11 @@ function render(){
     <div class="strip" id="strip">`;
   DAYS.forEach(d => {
     const db = d.score == null ? BANDS[4] : band(d.score);
-    html += `<div class="dayCard ${d.date===day.date?"sel":""} ${inSeason(d.date)?"":"out"}" data-d="${d.date}">
+    html += `<div class="dayCard ${d.date===day.date?"sel":""} ${inSeason(d.date)?"":"out"}" data-d="${d.date}" style="--tone:${db.col}">
       <div class="dcDow">${d.date===today?"Today":dowOf(d.date)}</div>
       <div class="dcDate">${+d.date.slice(8)}/${+d.date.slice(5,7)}</div>
-      <div class="dcScore" style="color:${db.col}">${d.score==null?"—":d.score.toFixed(1)}</div>
-      <div class="dcBar"><i style="width:${d.score==null?0:d.score*10}%;background:${db.col}"></i></div>
+      <div class="dcScore">${d.score==null?"—":d.score.toFixed(1)}</div>
+      <div class="dcBar"><i style="width:${d.score==null?0:d.score*10}%"></i></div>
       <div class="dcTime">${d.best?hhmm(d.best.htMin):"–"}</div>
     </div>`;
   });
@@ -868,8 +904,8 @@ function renderLog(){
     return `<div class="entry">
       <div class="entryEm">${c.em}</div>
       <div class="entryBody">
-        <div class="entryTop"><span>${dowOf(e.date)} ${+e.date.slice(8)}/${+e.date.slice(5,7)}/${e.date.slice(2,4)} · ${c.t}</span>
-          <span style="color:${e.score==null?"var(--mute2)":colFor(e.score)}">${e.score==null?"—":e.score.toFixed(1)}</span></div>
+        <div class="entryTop"><span><b>${dowOf(e.date)} ${+e.date.slice(8)}/${+e.date.slice(5,7)}</b> · ${c.t}</span>
+          <span class="entryScore" style="background:${e.score==null?"var(--sand)":colFor(e.score)}">${e.score==null?"—":e.score.toFixed(1)}</span></div>
         <div class="entryMeta">${e.score==null ? "no index recorded" : `Index said ${e.score.toFixed(1)}${e.htMin!=null?` · high water ${hhmm(e.htMin)}`:""}`}</div>
         ${e.note ? `<div class="entryNote">“${escapeHtml(e.note)}”</div>` : ""}
       </div>
@@ -927,7 +963,7 @@ function renderCalibration(){
     html += `<div class="calRow">
       <span class="calLabel">${g.em} ${g.t}</span>
       <span class="calBarWrap"><span class="calBar" style="width:${g.avg*10}%;background:${colFor(g.avg)}"></span></span>
-      <span class="calNum" style="color:${colFor(g.avg)}">${g.avg.toFixed(1)}<span style="color:var(--mute2);font-weight:400"> ×${g.n}</span></span>
+      <span class="calNum">${g.avg.toFixed(1)}<span> ×${g.n}</span></span>
     </div>`;
   });
 

@@ -4,10 +4,10 @@ import sys, pathlib
 
 OUT = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else ".")
 
-BG_TOP = (27, 44, 37)      # --panel2
-BG_BOT = (12, 20, 17)      # --bg
-BAIT   = (233, 242, 236)   # --ink
-WAVE   = (61, 219, 208)    # --electric
+BG_TOP = (255, 226, 122)   # butter, light
+BG_BOT = (255, 209, 58)    # butter, deep
+BAIT   = (20, 18, 16)      # ink
+WAVE   = (255, 79, 159)    # hot pink
 
 
 def icon(size, rounded=True):
@@ -39,7 +39,7 @@ def icon(size, rounded=True):
     # eye
     er = H * 0.17
     d.ellipse([cx - L / 2 + L * 0.10 - er, cy - er * 1.5, cx - L / 2 + L * 0.10 + er, cy + er * 0.5],
-              fill=(12, 20, 17, 255))
+              fill=(255, 217, 74, 255))
 
     if rounded:
         mask = Image.new("L", (S, S), 0)
