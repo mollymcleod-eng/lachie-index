@@ -337,6 +337,24 @@ input:focus,textarea:focus{outline:0;border-color:var(--ink)}
 }
 .offlineNote b{font-family:var(--disp);font-weight:800}
 
+/* ---------- install card ---------- */
+.installCard{
+  position:relative;margin-top:14px;padding:16px 40px 16px 17px;border-radius:var(--r2);
+  background:var(--lav);font-size:13.5px;line-height:1.5
+}
+.icTitle{font-family:var(--disp);font-size:18px;font-weight:800;letter-spacing:-.02em;margin-bottom:6px}
+.installCard p{margin:0 0 8px;font-weight:500}
+.installCard p:last-of-type{margin-bottom:0}
+.installCard ol{margin:8px 0 0;padding-left:20px}
+.installCard li{margin-bottom:6px;font-weight:500}
+.installCard li:last-child{margin-bottom:0}
+.installCard .btn{margin-top:12px}
+.icX{
+  position:absolute;top:10px;right:10px;width:28px;height:28px;border:0;border-radius:50%;
+  background:var(--scrim);color:var(--ink);font-size:13px;cursor:pointer;line-height:1
+}
+.icX:hover{background:var(--ink);color:var(--cream)}
+
 /* ---------- status / footer ---------- */
 .status{
   display:flex;align-items:center;gap:9px;justify-content:center;flex-wrap:wrap;
@@ -396,6 +414,16 @@ details summary{cursor:pointer;color:var(--ink);font-size:13.5px;padding:7px 0;f
     if (m) m.setAttribute("content", dark ? "#0E1613" : "#FBF6EC");
   }catch(e){}
 })();
+
+/* Catch the install prompt here, at the top of the document. Chrome fires
+   beforeinstallprompt very early — a listener added at the end of the body
+   can miss it entirely, and then the Install button never appears. */
+window.__installPrompt = null;
+window.addEventListener("beforeinstallprompt", function(e){
+  e.preventDefault();
+  window.__installPrompt = e;
+  window.dispatchEvent(new Event("lachie-installable"));
+});
 </script>
 <div class="wrap">
 
@@ -409,6 +437,8 @@ details summary{cursor:pointer;color:var(--ink);font-size:13.5px;padding:7px 0;f
   </div>
   <div class="season" id="season"><span class="dot"></span><span id="seasonTxt">…</span></div>
 </header>
+
+<div class="installCard" id="installCard" hidden></div>
 
 <div id="app"><div class="skel">Reading the river…</div></div>
 
@@ -1255,6 +1285,90 @@ function renderSeason(){
   }
 }
 
+/* ===================== install helper ================================
+   "Add to Home Screen" hides in different places per browser, and in an
+   in-app browser (a link tapped inside Messenger, WhatsApp, Gmail and so
+   on) it does not exist at all — which is the usual reason someone cannot
+   find it. So work out which case this is and say exactly that.
+   ====================================================================== */
+const INSTALL_KEY = "lachie.installcard.v1";
+
+function installState(){
+  const ua = navigator.userAgent;
+  const standalone = window.matchMedia("(display-mode: standalone)").matches
+                  || window.navigator.standalone === true;
+  if (standalone) return { kind:"installed" };
+
+  // Embedded webviews inside other apps. Chrome (CriOS) and Firefox (FxiOS)
+  // on iOS are real browsers and deliberately excluded.
+  const inApp = /(FBAN|FBAV|FB_IAB|Instagram|WhatsApp|Line\/|MicroMessenger|LinkedInApp|Snapchat|Pinterest|TikTok)/i.test(ua);
+  const iOS = /iPad|iPhone|iPod/.test(ua)
+           || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+
+  if (inApp) return { kind:"inapp", iOS };
+  if (window.__installPrompt) return { kind:"prompt" };     // Chrome/Edge/Android
+  if (iOS) return { kind:"ios", chrome:/CriOS/.test(ua) };
+  return { kind:"manual", android:/Android/.test(ua), samsung:/SamsungBrowser/.test(ua) };
+}
+
+function renderInstall(){
+  const el = document.getElementById("installCard");
+  if (!el) return;
+  let dismissed = false;
+  try { dismissed = localStorage.getItem(INSTALL_KEY) === "off"; } catch(e){}
+  const st = installState();
+  if (st.kind === "installed" || dismissed){ el.hidden = true; return; }
+
+  let body;
+  if (st.kind === "prompt"){
+    body = `<div class="icTitle">Put it on the home screen</div>
+      <p>Opens fullscreen, keeps working with no signal.</p>
+      <button class="btn" id="icGo">Install the app</button>`;
+  } else if (st.kind === "inapp"){
+    body = `<div class="icTitle">Open this in your browser first</div>
+      <p>You've tapped the link inside another app, and app-in-app browsers can't
+      add to the home screen at all — that's why the option isn't there.</p>
+      <p><b>Tap the ⋯ or ⇪ icon in this bar and choose
+      ${st.iOS ? "“Open in Safari”" : "“Open in Chrome”"}</b>, then come back to this card.</p>`;
+  } else if (st.kind === "ios"){
+    body = `<div class="icTitle">Put it on the home screen</div>
+      ${st.chrome ? `<p><b>Use Safari for this</b> — in Chrome on iPhone the app can't save itself
+        for offline use. Copy the link into Safari first.</p>` : ""}
+      <ol>
+        <li>Tap <b>Share</b> — the box with an arrow coming out of it, in the bar
+          ${st.chrome ? "at the top" : "at the bottom"} of the screen</li>
+        <li><b>Scroll down</b> past the row of apps and past “Add Bookmark” —
+          this is the step everyone misses</li>
+        <li>Tap <b>Add to Home Screen</b>, then <b>Add</b></li>
+      </ol>`;
+  } else {
+    body = `<div class="icTitle">Put it on the home screen</div>
+      <ol>
+        <li>Tap the <b>⋮</b> menu, top right</li>
+        <li>Choose <b>Install app</b>, or <b>Add to Home screen</b>${st.samsung ? " → <b>Home screen</b>" : ""}</li>
+      </ol>
+      ${st.samsung ? `<p>That's Samsung Internet. Chrome works too and calls it “Install app”.</p>` : ""}`;
+  }
+
+  el.hidden = false;
+  el.innerHTML = body + `<button class="icX" id="icX" title="Hide">✕</button>`;
+  const go = document.getElementById("icGo");
+  if (go) go.addEventListener("click", async () => {
+    const p = window.__installPrompt;
+    if (!p) return;
+    p.prompt();
+    try { await p.userChoice; } catch(e){}
+    window.__installPrompt = null;
+    renderInstall();
+  });
+  document.getElementById("icX").addEventListener("click", () => {
+    try { localStorage.setItem(INSTALL_KEY, "off"); } catch(e){}
+    el.hidden = true;
+  });
+}
+window.addEventListener("lachie-installable", renderInstall);
+window.addEventListener("appinstalled", () => { try { localStorage.setItem(INSTALL_KEY,"off"); } catch(e){} renderInstall(); });
+
 /* ===================== offline readiness =============================
    The whole hut promise rests on a service worker holding the page. Not
    every browser grants one — third-party browsers on iOS in particular
@@ -1507,6 +1621,7 @@ async function boot(){
     DATA_MODE = WX ? "cached" : "tideonly";
   }
   rebuild(); renderLog(); renderCalibration();
+  renderInstall();
   setTimeout(renderOffline, 4000);
 }
 
