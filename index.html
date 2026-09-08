@@ -47,9 +47,12 @@ body{
    iPhone, so the gutters have to respect the safe area, not a flat 16px. */
 .wrap{
   max-width:660px;margin:0 auto;
+  padding:0 16px 60px;                    /* plain fallback FIRST — if the
+     max()/env() lines below fail to parse they are dropped, and without this
+     there would be no side padding at all and every card would run flush to
+     both screen edges. */
   padding-left:max(16px, env(safe-area-inset-left));
   padding-right:max(16px, env(safe-area-inset-right));
-  padding-bottom:60px
 }
 /* Emoji have wider advances on iOS than on Android; pin them so they can't
    change a row's height or shove a neighbour out of its track. */
@@ -278,9 +281,9 @@ details summary{cursor:pointer;color:var(--ink);font-size:13.5px;padding:7px 0;f
   .panelHead h2{font-size:22px} .outCond{font-size:19px}
   .facNote{min-height:40px}
   .wrap{
+    padding:0 13px 56px;                  /* fallback first, as above */
     padding-left:max(13px, env(safe-area-inset-left));
     padding-right:max(13px, env(safe-area-inset-right));
-    padding-bottom:56px
   }
   /* Five labelled buttons across a narrow phone is tight, and iOS sets wider
      glyphs than Android, so leave real headroom rather than 3px. */
@@ -1257,6 +1260,60 @@ document.getElementById("lgImport").addEventListener("click", () => {
 
 boot();
 window.addEventListener("online", boot);
+
+/* ---------------------------------------------------------------------
+   Diagnostics — open the page with ?debug on the end of the URL.
+   Deliberately styled with inline attributes only, so it still renders
+   legibly even if the stylesheet is the thing that is broken.
+   --------------------------------------------------------------------- */
+if (/[?&]debug/.test(location.search)){
+  const box = document.createElement("div");
+  box.setAttribute("style",
+    "position:relative;z-index:9999;margin:0;padding:12px;background:#111;color:#0f0;" +
+    "font:12px/1.45 ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;word-break:break-word");
+  document.body.insertBefore(box, document.body.firstChild);
+
+  const sup = (p,v) => { try { return CSS.supports(p,v) ? "yes" : "NO"; } catch(e){ return "?"; } };
+  const read = () => {
+    const wrap = document.querySelector(".wrap");
+    const cs = wrap ? getComputedStyle(wrap) : null;
+    const sc = document.querySelector(".score");
+    const vv = window.visualViewport;
+    const L = [
+      "=== LACHIE INDEX DIAGNOSTICS ===",
+      "ua: " + navigator.userAgent,
+      "dpr: " + window.devicePixelRatio,
+      "innerWidth: " + window.innerWidth + "  docClientWidth: " + document.documentElement.clientWidth,
+      "visualViewport: " + (vv ? Math.round(vv.width) + "w  scale=" + vv.scale.toFixed(3) : "n/a"),
+      "  ^ scale must be 1.000 — anything else means the browser is ZOOMED",
+      "wrap padding L/R: " + (cs ? cs.paddingLeft + " / " + cs.paddingRight : "n/a") + "   (expect 13-16px, NOT 0px)",
+      "wrap width: " + (wrap ? Math.round(wrap.getBoundingClientRect().width) : "n/a"),
+      "score font-size: " + (sc ? getComputedStyle(sc).fontSize : "not rendered yet") + "   (expect 74px on a phone)",
+      "doc scrollWidth: " + document.documentElement.scrollWidth + "  (should equal docClientWidth)",
+      "fonts: " + document.fonts.status +
+        "  bricolage=" + (document.fonts.check('800 40px "Bricolage Grotesque"') ? "y" : "n"),
+      "--- css support ---",
+      "max()+env():        " + sup("padding-left","max(16px, env(safe-area-inset-left))"),
+      "flex/grid gap:      " + sup("row-gap","10px"),
+      "minmax(0,1fr):      " + sup("grid-template-columns","repeat(2,minmax(0,1fr))"),
+      "overflow-wrap any:  " + sup("overflow-wrap","anywhere"),
+      "custom prop var():  " + sup("color","var(--ink)"),
+      "data mode: " + DATA_MODE + "   score: " + (DAYS[0] ? DAYS[0].score : "-")
+    ];
+    box.textContent = L.join("\n");
+    const b = document.createElement("button");
+    b.textContent = "Copy this";
+    b.setAttribute("style","display:block;margin-top:10px;padding:10px 14px;font:600 14px sans-serif;background:#0f0;color:#000;border:0;border-radius:6px");
+    b.onclick = () => {
+      const t = box.textContent.replace("Copy this","");
+      navigator.clipboard?.writeText(t).then(() => b.textContent = "Copied ✓",
+                                             () => b.textContent = "Select the text above and copy it");
+    };
+    box.appendChild(b);
+  };
+  setTimeout(read, 1200);
+  setTimeout(read, 6000);
+}
 
 /* Offline shell. Only meaningful when served over https (the hosted copy);
    opening the file straight off disk simply skips it. */
