@@ -1281,9 +1281,13 @@ function renderStatus(){
     el.className = "status";
     el.innerHTML = `<span>✓ Live data · updated ${hhmm(nzNow().min)}</span> <button id="refresh">refresh</button>`;
   } else if (DATA_MODE === "cached"){
-    const hrs = Math.round((Date.now() - WX.fetchedAt)/36e5);
+    const hrs = (Date.now() - WX.fetchedAt)/36e5;
+    const age = hrs < 1  ? "under an hour ago"
+              : hrs < 48 ? Math.round(hrs) + " h ago"
+              :            Math.round(hrs/24) + " days ago";
+    const old = hrs > 36;
     el.className = "status warn";
-    el.innerHTML = `<span>⚠ No signal — using weather saved ${hrs<1?"under an hour":hrs+" h"} ago</span> <button id="refresh">try again</button>`;
+    el.innerHTML = `<span>⚠ No signal — using weather saved ${age}${old ? ", so treat rain, river and sea as a rough guide only" : ""}. Tides and moon are exact.</span> <button id="refresh">try again</button>`;
   } else if (DATA_MODE === "tideonly"){
     el.className = "status warn";
     el.innerHTML = `<span>⚠ No signal and nothing saved — tide and moon only. Rain, river and sea are missing, so the score is partial.</span> <button id="refresh">try again</button>`;
@@ -1662,8 +1666,11 @@ function spearman(a, b){
 }
 
 /* ===================== boot =========================================== */
+let BUILT_DATE = null;
+
 function rebuild(){
   const today = nzNow().date;
+  BUILT_DATE = today;
   DAYS = [];
   for (let i = 0; i < DETAIL_DAYS; i++){
     const d = addDays(today, i);
@@ -1733,6 +1740,32 @@ document.getElementById("lgImport").addEventListener("click", () => {
 
 boot();
 window.addEventListener("online", boot);
+
+/* ---------------------------------------------------------------------
+   Keep it honest about what day it is.
+
+   A home-screen app is usually RESUMED from memory rather than reloaded,
+   so without this the page keeps whatever "today" it was built with — open
+   it at 5am after using it last night and it would cheerfully show
+   yesterday's tide as today's. Re-check whenever it comes back to the
+   front, and rebuild if the date rolled over or the forecast has gone
+   stale. Costs nothing when neither is true.
+   --------------------------------------------------------------------- */
+const STALE_MS = 30*60*1000;
+
+function maybeRefresh(){
+  const today = nzNow().date;
+  const dayRolled = BUILT_DATE !== today;
+  const forecastStale = !WX || (Date.now() - WX.fetchedAt) > STALE_MS;
+  if (dayRolled || forecastStale) boot();
+  else applyTheme();                     // no rebuild needed, but let dawn land
+}
+
+document.addEventListener("visibilitychange", () => { if (!document.hidden) maybeRefresh(); });
+window.addEventListener("pageshow", e => { if (e.persisted) maybeRefresh(); });
+window.addEventListener("focus", maybeRefresh);
+// Catches midnight rolling over while the app sits open at the hut.
+setInterval(() => { if (BUILT_DATE !== nzNow().date) boot(); }, 10*60*1000);
 
 /* ---------------------------------------------------------------------
    Diagnostics — open the page with ?debug on the end of the URL.
