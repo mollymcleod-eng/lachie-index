@@ -33,14 +33,30 @@
   --body:"Plus Jakarta Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
 }
 *{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 body{
   margin:0;background:var(--cream);color:var(--ink);
   font:16px/1.5 var(--body);
   padding-bottom:env(safe-area-inset-bottom);
   -webkit-font-smoothing:antialiased;
+  -webkit-text-size-adjust:100%;text-size-adjust:100%;
+  overflow-x:hidden;                        /* nothing should ever scroll sideways */
+  -webkit-tap-highlight-color:rgba(20,18,16,.08);
 }
-.wrap{max-width:660px;margin:0 auto;padding:0 16px 60px}
+/* viewport-fit=cover lets the page under the rounded corners on a notched
+   iPhone, so the gutters have to respect the safe area, not a flat 16px. */
+.wrap{
+  max-width:660px;margin:0 auto;
+  padding-left:max(16px, env(safe-area-inset-left));
+  padding-right:max(16px, env(safe-area-inset-right));
+  padding-bottom:60px
+}
+/* Emoji have wider advances on iOS than on Android; pin them so they can't
+   change a row's height or shove a neighbour out of its track. */
+.facIcon,.dcWx span,.entryEm,.cb .em,.outIcon{
+  font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;
+  line-height:1;font-style:normal
+}
 h1,h2,h3{margin:0;font-family:var(--disp);font-weight:800;letter-spacing:-.03em;line-height:1.02}
 button{font:inherit;color:inherit}
 em{font-family:var(--serif);font-style:italic;letter-spacing:0}
@@ -133,9 +149,9 @@ header{padding:26px 0 14px}
 .outCond{font-family:var(--disp);font-size:21px;font-weight:800;letter-spacing:-.025em}
 .outTemp{font-family:var(--disp);font-size:34px;font-weight:800;letter-spacing:-.045em;line-height:1.05;margin-top:2px}
 .outTemp span{font-family:var(--body);font-size:13px;font-weight:600;opacity:.6;margin-left:8px;letter-spacing:0}
-.outGrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.outGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
 .outCell{background:var(--sand);border-radius:var(--r3);padding:11px 13px}
-.outCell b{display:block;font-family:var(--disp);font-size:16px;font-weight:800;letter-spacing:-.025em}
+.outCell b{display:block;overflow-wrap:anywhere;font-family:var(--disp);font-size:16px;font-weight:800;letter-spacing:-.025em}
 .outCell span{display:block;font-size:11px;color:var(--ink2);margin-top:2px;font-weight:600}
 .outNote{
   margin-top:10px;padding:13px 15px;border-radius:var(--r2);
@@ -147,11 +163,11 @@ header{padding:26px 0 14px}
 }
 
 /* ---------- factor tiles ---------- */
-.facGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.facGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .fac{background:var(--tile);border-radius:var(--r2);padding:15px 15px 16px;cursor:default}
 .facTop{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
 .facIcon{font-size:20px;line-height:1}
-.facVal{font-family:var(--disp);font-size:26px;font-weight:800;letter-spacing:-.045em;font-variant-numeric:tabular-nums;line-height:1}
+.facVal{flex:none;font-family:var(--disp);font-size:26px;font-weight:800;letter-spacing:-.045em;font-variant-numeric:tabular-nums;line-height:1}
 .facVal small{font-size:11px;font-weight:700;opacity:.45;font-family:var(--body)}
 .facName{font-family:var(--disp);font-size:17px;font-weight:800;margin-top:11px;letter-spacing:-.02em}
 .facNote{font-size:11.5px;color:var(--ink2);margin-top:3px;line-height:1.4;font-weight:500;min-height:32px}
@@ -178,7 +194,7 @@ header{padding:26px 0 14px}
 .dcBar{height:4px;border-radius:99px;background:rgba(20,18,16,.16);overflow:hidden}
 .dcBar>i{display:block;height:100%;border-radius:99px;background:var(--ink)}
 .dcWx{
-  display:flex;align-items:center;justify-content:center;gap:3px;
+  white-space:nowrap;display:flex;align-items:center;justify-content:center;gap:3px;
   margin-top:7px;font-size:11px;font-weight:800;font-variant-numeric:tabular-nums
 }
 .dcWx span{font-size:13px}
@@ -189,13 +205,13 @@ header{padding:26px 0 14px}
 .field label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.11em;color:var(--mute);font-weight:800;margin-bottom:7px}
 input,select,textarea{
   width:100%;background:var(--cream);border:2px solid var(--line);border-radius:var(--r3);
-  padding:12px;color:var(--ink);font:inherit;font-size:15px;font-weight:500
+  padding:12px;color:var(--ink);font:inherit;font-size:16px;font-weight:500
 }
 textarea{resize:vertical;min-height:62px}
 input:focus,textarea:focus{outline:0;border-color:var(--ink)}
-.catchBtns{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}
+.catchBtns{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px}
 .cb{
-  padding:11px 3px;border-radius:var(--r3);background:var(--cream);border:2px solid var(--line);
+  min-width:0;padding:11px 3px;border-radius:var(--r3);background:var(--cream);border:2px solid var(--line);
   cursor:pointer;text-align:center;font-size:10.5px;font-weight:700;line-height:1.25;color:var(--ink2)
 }
 .cb .em{display:block;font-size:19px;margin-bottom:4px}
@@ -259,7 +275,20 @@ details summary{cursor:pointer;color:var(--ink);font-size:13.5px;padding:7px 0;f
 
 @media (max-width:400px){
   .brand{font-size:33px} .score{font-size:80px} .place{font-size:19px}
-  .facNote{min-height:40px} .wrap{padding:0 13px 56px}
+  .facNote{min-height:40px}
+  .wrap{
+    padding-left:max(13px, env(safe-area-inset-left));
+    padding-right:max(13px, env(safe-area-inset-right));
+    padding-bottom:56px
+  }
+  /* Five labelled buttons across a narrow phone is tight, and iOS sets wider
+     glyphs than Android, so leave real headroom rather than 3px. */
+  .catchBtns{gap:5px}
+  .cb{padding:10px 2px;font-size:9.5px;overflow-wrap:break-word}
+  .cb .em{font-size:16px;margin-bottom:2px}
+  .outIcon{font-size:38px}
+  .outTemp{font-size:29px}
+  .outCell b{font-size:15px}
 }
 </style>
 </head>
@@ -860,7 +889,7 @@ function render(){
 
   let html = `
   <section class="hero" style="--tone:${b.col}">
-    <svg class="blob" viewBox="0 0 200 200" aria-hidden="true"><g transform="translate(100,100)">
+    <svg class="blob" width="172" height="172" viewBox="0 0 200 200" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g transform="translate(100,100)">
       <path fill="#fff" d="M45,-58C58,-46,66,-29,69,-11C72,7,70,26,60,40C50,54,32,63,12,68C-8,73,-30,74,-47,65C-64,56,-76,37,-79,17C-82,-3,-76,-24,-64,-40C-52,-56,-34,-67,-15,-70C4,-73,25,-70,45,-58Z"/>
     </g></svg>
     <div class="heroTop">
