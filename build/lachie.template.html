@@ -165,6 +165,41 @@ header{padding:26px 0 14px}
   font-family:var(--serif);font-style:italic;font-size:16px;line-height:1.4
 }
 
+/* ---------- long range ---------- */
+.lrNote{
+  font-size:12.5px;line-height:1.5;color:var(--ink2);background:var(--sand);
+  border-radius:var(--r3);padding:11px 13px;margin-bottom:13px;font-weight:500
+}
+.lrNote b{font-weight:800;color:var(--ink)}
+.rhythm{display:flex;align-items:flex-end;gap:2px;height:88px;padding:0 1px}
+.rBar{
+  flex:1;min-width:3px;height:var(--h);background:var(--c);
+  border-radius:3px 3px 2px 2px;cursor:pointer;transition:opacity .12s
+}
+.rBar:hover{opacity:.7}
+.rBar.on{box-shadow:0 0 0 2px var(--ink)}
+.rhythmAxis{
+  display:flex;justify-content:space-between;gap:8px;margin-top:7px;
+  font-size:10.5px;color:var(--mute);font-weight:700
+}
+.lrRead{
+  margin-top:11px;padding:12px 14px;border-radius:var(--r2);background:var(--lav);
+  font-size:13.5px;line-height:1.5;font-weight:500
+}
+.lrRead b{font-family:var(--disp);font-weight:800}
+.lrHead{
+  margin:16px 0 9px;font-family:var(--disp);font-size:15px;font-weight:800;letter-spacing:-.02em
+}
+.lrRow{display:flex;align-items:center;gap:11px;padding:8px 0}
+.lrRow+.lrRow{border-top:2px solid var(--line)}
+.lrScore{
+  font-family:var(--disp);font-weight:800;font-size:15px;letter-spacing:-.03em;flex:none;
+  padding:5px 10px;border-radius:999px;font-variant-numeric:tabular-nums
+}
+.lrBody{display:flex;flex-direction:column;min-width:0}
+.lrBody b{font-family:var(--disp);font-size:15px;font-weight:800;letter-spacing:-.02em}
+.lrBody span{font-size:11.5px;color:var(--ink2);font-weight:500;margin-top:1px}
+
 /* ---------- factor tiles ---------- */
 .facGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .fac{background:var(--tile);border-radius:var(--r2);padding:15px 15px 16px;cursor:default}
@@ -369,6 +404,14 @@ details summary{cursor:pointer;color:var(--ink);font-size:13.5px;padding:7px 0;f
       dangerous mouth are subtracted after the weighted total, so one genuinely bad factor can
       sink an otherwise tidy-looking day.
     </p>
+    <p>
+      <b>Two ranges, on purpose.</b> The full Index runs 16 days, which is as far as the rain,
+      river and swell forecasts actually reach. Past that, <b>The long game</b> scores tide and
+      moon only — both are arithmetic and known exactly for years ahead — keeping them in the same
+      3:1 proportion they hold in the real Index. It is named and scored separately because
+      calling a five-week-out number a Lachie Index would be claiming knowledge nobody has. It
+      answers one question: which days have the water behind them.
+    </p>
   </details>
   <p style="margin-top:12px">
     Whitebait season: <b>1 September – 30 October</b>. Fishing hours <b>5am–8pm</b> NZST,
@@ -535,9 +578,9 @@ async function loadWeather(){
   // The weather feed is essential; river and sea are each optional, so one
   // endpoint being down degrades a single factor instead of the whole page.
   const [wx, fl, mar] = await Promise.allSettled([
-    getJSON(`https://api.open-meteo.com/v1/forecast?${q}&hourly=precipitation,cloud_cover,wind_speed_10m,wind_direction_10m,temperature_2m,apparent_temperature,weather_code,wind_gusts_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,sunrise,sunset&past_days=10&forecast_days=8&timezone=Pacific%2FAuckland`),
-    getJSON(`https://flood-api.open-meteo.com/v1/flood?${q}&daily=river_discharge&past_days=60&forecast_days=8`),
-    getJSON(`https://marine-api.open-meteo.com/v1/marine?${q}&hourly=wave_height,swell_wave_height&past_days=2&forecast_days=8&timezone=Pacific%2FAuckland`)
+    getJSON(`https://api.open-meteo.com/v1/forecast?${q}&hourly=precipitation,cloud_cover,wind_speed_10m,wind_direction_10m,temperature_2m,apparent_temperature,weather_code,wind_gusts_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,sunrise,sunset&past_days=10&forecast_days=16&timezone=Pacific%2FAuckland`),
+    getJSON(`https://flood-api.open-meteo.com/v1/flood?${q}&daily=river_discharge&past_days=60&forecast_days=16`),
+    getJSON(`https://marine-api.open-meteo.com/v1/marine?${q}&hourly=wave_height,swell_wave_height&past_days=2&forecast_days=16&timezone=Pacific%2FAuckland`)
   ]);
   if (wx.status !== "fulfilled") throw wx.reason;
   const ok = r => r.status === "fulfilled" ? r.value : null;
@@ -789,6 +832,58 @@ function scoreWindow(date, ht){
   };
 }
 
+/* =====================================================================
+   Long range.
+   Past the weather feed's 16 days there is no rain, river or swell to be
+   had — but the tide is *arithmetic*, known exactly for years, and so is
+   the moon. Those two carry 40% of the real index between them, so they
+   support a genuine tide outlook and nothing more. It is scored and named
+   separately from the Lachie Index on purpose: presenting a 3-week-out
+   number as the same thing would be claiming knowledge that does not exist.
+   ===================================================================== */
+const DETAIL_DAYS = 16;
+
+function seasonWindow(today){
+  const y = +today.slice(0,4), m = +today.slice(5,7);
+  if (m === 9 || m === 10) return { from:`${y}-09-01`, to:`${y}-10-30` };
+  const ny = m > 10 ? y + 1 : y;                     // Nov/Dec look to next year
+  return { from:`${ny}-09-01`, to:`${ny}-10-30` };
+}
+
+function tideOutlook(date){
+  const lh = legalHours(date);
+  const wins = highTides(date).map(ht => {
+    const startRaw = ht.min - 180, endRaw = ht.min + 30;
+    const start = Math.max(startRaw, lh.from), end = Math.min(endRaw, lh.to);
+    if (end - start < 60) return null;
+    const range = ht.range != null ? ht.range : (ht.h - 0.6);
+    let t = clamp(piece(range, [[0.8,1],[1.1,3],[1.4,5.5],[1.7,7.5],[1.95,9.2],[2.2,10]]), 0, 10);
+    const fullness = (end - start) / (endRaw - startRaw);
+    if (fullness < 1) t *= (0.55 + 0.45*fullness);
+    const mn = moon(date);
+    const m = clamp(2 + 8*Math.pow(mn.springiness, 1.3), 0, 10);
+    // Keep tide and moon in the same 3:1 proportion they hold in the full index.
+    const s = (t*W.tide + m*W.moon) / (W.tide + W.moon);
+    return { date, htMin:ht.min, start, end, range, htH:ht.h,
+             score:round1(s), tide:round1(t), moonScore:round1(m), moon:mn };
+  }).filter(Boolean);
+  if (!wins.length) return null;
+  wins.sort((a,b) => b.score - a.score);
+  return wins[0];
+}
+
+function buildLongRange(today){
+  const sw = seasonWindow(today);
+  let from = addDays(today, DETAIL_DAYS);
+  if (from < sw.from) from = sw.from;                 // out of season: whole next season
+  const out = [];
+  for (let d = from; d <= sw.to && d <= TIDES.end; d = addDays(d, 1)){
+    const o = tideOutlook(d);
+    if (o) out.push(o);
+  }
+  return out;
+}
+
 /* Plain-language read on standing in it for three hours at dawn. */
 function comfortRead(feels, rain, wind, gust){
   if (feels == null) return null;
@@ -872,7 +967,7 @@ function verdict(day){
 }
 
 /* ===================== rendering ====================================== */
-let SEL = null, DAYS = [];
+let SEL = null, DAYS = [], LONG = [];
 
 function colFor(v){
   return v >= 9 ? "var(--electric)" : v >= 7 ? "var(--green)"
@@ -987,7 +1082,7 @@ function render(){
   }
 
   /* --- outlook --- */
-  html += `<section class="panel"><div class="panelHead"><h2>Next 8 days</h2><span class="hint">tap a day</span></div>
+  html += `<section class="panel"><div class="panelHead"><h2>Next ${DAYS.length} days</h2><span class="hint">tap a day</span></div>
     <div class="strip" id="strip">`;
   DAYS.forEach(d => {
     const db = d.score == null ? BANDS[4] : band(d.score);
@@ -1003,12 +1098,58 @@ function render(){
   });
   html += `</div></section>`;
 
+  /* --- long range: tide and moon only --- */
+  if (LONG.length){
+    const MON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    const best = LONG.slice().sort((a,b) => b.score - a.score || a.date.localeCompare(b.date)).slice(0,5);
+    html += `<section class="panel">
+      <div class="panelHead"><h2>The long game</h2>
+        <span class="hint">${LONG[0].date.slice(8)}/${+LONG[0].date.slice(5,7)} – ${+LONG[LONG.length-1].date.slice(8)}/${+LONG[LONG.length-1].date.slice(5,7)}</span></div>
+      <div class="lrNote">Tide and moon only — those are exact this far out. No rain, river or sea
+        beyond ${DETAIL_DAYS} days, so this is <b>not</b> a Lachie Index score. It tells you which
+        days have the water behind them.</div>
+      <div class="rhythm" id="rhythm">`;
+    LONG.forEach(o => {
+      const rb = band(o.score);
+      html += `<div class="rBar" data-d="${o.date}" title="${dowOf(o.date)} ${+o.date.slice(8)} ${MON[+o.date.slice(5,7)-1]} · tide outlook ${o.score.toFixed(1)}"
+        style="--h:${Math.max(6, o.score*10)}%;--c:${rb.col}"></div>`;
+    });
+    html += `</div>
+      <div class="rhythmAxis"><span>${+LONG[0].date.slice(8)} ${MON[+LONG[0].date.slice(5,7)-1]}</span>
+        <span>spring / neap rhythm</span>
+        <span>${+LONG[LONG.length-1].date.slice(8)} ${MON[+LONG[LONG.length-1].date.slice(5,7)-1]}</span></div>
+      <div class="lrRead" id="lrRead">Tap a bar for that day's tide.</div>
+      <div class="lrHead">Best bets between now and the end of the season</div>`;
+    best.forEach(o => {
+      const rb = band(o.score);
+      html += `<div class="lrRow">
+        <span class="lrScore" style="background:${rb.col}">${o.score.toFixed(1)}</span>
+        <span class="lrBody"><b>${dowOf(o.date)} ${+o.date.slice(8)} ${MON[+o.date.slice(5,7)-1]}</b>
+          <span>${hhmm(o.start)}–${hhmm(o.end)} · high ${hhmm(o.htMin)} · ${o.range.toFixed(1)} m range · ${o.moon.glyph}</span></span>
+      </div>`;
+    });
+    html += `</section>`;
+  }
+
   app.innerHTML = html;
 
   document.getElementById("prevD")?.addEventListener("click", () => { SEL = DAYS[i-1].date; render(); });
   document.getElementById("nextD")?.addEventListener("click", () => { SEL = DAYS[i+1].date; render(); });
   document.querySelectorAll(".dayCard").forEach(el =>
     el.addEventListener("click", () => { SEL = el.dataset.d; render(); window.scrollTo({top:0,behavior:"smooth"}); }));
+
+  const MON2 = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  document.querySelectorAll(".rBar").forEach(el => el.addEventListener("click", () => {
+    const o = LONG.find(x => x.date === el.dataset.d);
+    if (!o) return;
+    document.querySelectorAll(".rBar").forEach(b => b.classList.remove("on"));
+    el.classList.add("on");
+    const r = document.getElementById("lrRead");
+    r.innerHTML = `<b>${dowOf(o.date)} ${+o.date.slice(8)} ${MON2[+o.date.slice(5,7)-1]}</b> — `
+      + `be there ${hhmm(o.start)}–${hhmm(o.end)}, high water ${hhmm(o.htMin)} at ${o.htH.toFixed(1)} m `
+      + `(${o.range.toFixed(1)} m range). ${o.moon.glyph} ${o.moon.name.toLowerCase()}. `
+      + `Tide outlook <b>${o.score.toFixed(1)}</b>.`;
+  }));
 }
 
 function renderStatus(){
@@ -1196,10 +1337,11 @@ function spearman(a, b){
 function rebuild(){
   const today = nzNow().date;
   DAYS = [];
-  for (let i = 0; i < 8; i++){
+  for (let i = 0; i < DETAIL_DAYS; i++){
     const d = addDays(today, i);
     if (TIDES.map.has(d)) DAYS.push(scoreDay(d));
   }
+  LONG = buildLongRange(today);
   if (!SEL || !DAYS.some(d => d.date === SEL)) SEL = today;
   renderSeason(); render(); renderStatus();
 }

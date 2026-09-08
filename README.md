@@ -60,6 +60,20 @@ Weighted: Tide 30%, Fresh 20%, River 20%, Weather 10%, Wind/Sea 10%, Moon 10%.
 Penalties come off the total afterwards, so one genuinely bad factor sinks an otherwise tidy day:
 flood **−3**, drought **−2**, dangerous mouth **−2**.
 
+## Two ranges, deliberately
+
+**The full Index runs 16 days** — the limit of what the rain, river and swell forecasts actually
+cover. Beyond that, **The long game** scores **tide and moon only**, since both are arithmetic and
+known exactly years ahead, kept in the same 3:1 proportion they hold in the real Index.
+
+It is named and scored separately on purpose. Calling a five-week-out number a Lachie Index would
+claim knowledge nobody has. It answers exactly one question — *which days have the water behind
+them* — and the spring/neap rhythm chart makes the good weeks obvious at a glance.
+
+River discharge is available 210 days out and was deliberately **left out** of the long range: at
+that distance GloFAS is climatology rather than forecast, and dressing it up as a prediction would
+be false precision.
+
 ## The Book
 
 Log what you actually caught. The app stores what the Index predicted alongside it, and once
