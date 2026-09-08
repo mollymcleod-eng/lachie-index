@@ -27,11 +27,36 @@
   --red:#FF8A72; --orange:#FFB35C; --yellow:#FFD94A;
   --green:#6FD3A0; --electric:#FF4F9F;
 
+  --scrim:rgba(255,255,255,.58);
+  --scrimStrong:rgba(255,255,255,.72);
+  --track:rgba(20,18,16,.15);
+
   --r:28px; --r2:20px; --r3:14px;
   --disp:"Bricolage Grotesque",ui-sans-serif,system-ui,"Segoe UI",Roboto,sans-serif;
   --serif:"Instrument Serif",Georgia,"Times New Roman",serif;
   --body:"Plus Jakarta Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
 }
+/* ---------- dark, for a 5am hut ----------
+   Every colour in this page is a token, so dark mode is a palette swap and
+   nothing else. The pastels become deep tints rather than staying bright:
+   a wall of full-strength pastel at 5am would be a torch, which defeats the
+   whole point. Text flips light, so the ink-on-colour contrast survives. */
+:root[data-theme="dark"]{
+  --cream:#0E1613; --paper:#152220; --sand:#1E2E2A;
+  --ink:#E9F2EC; --ink2:#A7BAB2; --mute:#7B908A; --line:#263833;
+
+  --butter:#6D5915; --pink:#6B2745; --hotpink:#C2397A;
+  --mint:#1D5038; --lav:#3B3670; --coral:#7A392D;
+  --sky:#1E4560; --peach:#6D4425; --olive:#495929;
+
+  --red:#8E3A2C; --orange:#8A5620; --yellow:#7A6318;
+  --green:#256B49; --electric:#96306A;
+
+  --scrim:rgba(0,0,0,.30);
+  --scrimStrong:rgba(0,0,0,.34);
+  --track:rgba(255,255,255,.20);
+}
+
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 body{
@@ -66,6 +91,14 @@ em{font-family:var(--serif);font-style:italic;letter-spacing:0}
 
 /* ---------- header ---------- */
 header{padding:26px 0 14px}
+.headTop{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.headId{min-width:0}
+.themeBtn{
+  flex:none;margin-top:4px;padding:8px 13px;border-radius:999px;cursor:pointer;
+  background:var(--sand);border:2px solid var(--line);color:var(--ink2);
+  font-size:12px;font-weight:800;white-space:nowrap
+}
+.themeBtn:hover{border-color:var(--ink);color:var(--ink)}
 .brand{font-size:38px;line-height:.92}
 .brand .tm{font-size:12px;vertical-align:super;font-weight:600;opacity:.5;font-family:var(--body)}
 .place{
@@ -91,14 +124,16 @@ header{padding:26px 0 14px}
   position:absolute;right:-52px;top:-58px;width:172px;height:172px;
   opacity:.34;pointer-events:none;z-index:0
 }
+/* A 34% white blob on a deep ground reads as a smudge rather than a highlight. */
+:root[data-theme="dark"] .hero>.blob{opacity:.10}
 .heroTop{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .heroDay{
   font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;
-  background:rgba(255,255,255,.55);padding:6px 12px;border-radius:999px
+  background:var(--scrim);padding:6px 12px;border-radius:999px
 }
 .heroNav{display:flex;gap:7px}
 .navBtn{
-  background:rgba(255,255,255,.6);border:0;border-radius:50%;
+  background:var(--scrim);border:0;border-radius:50%;
   width:34px;height:34px;cursor:pointer;font-size:17px;line-height:1;
   display:grid;place-items:center;color:var(--ink);font-weight:700
 }
@@ -112,7 +147,7 @@ header{padding:26px 0 14px}
   font-family:var(--disp);font-size:15px;font-weight:800;letter-spacing:-.01em;
   background:var(--ink);color:var(--cream)
 }
-.quote{margin-top:16px;padding:16px 18px;background:rgba(255,255,255,.72);border-radius:var(--r2)}
+.quote{margin-top:16px;padding:16px 18px;background:var(--scrimStrong);border-radius:var(--r2)}
 .quote .who{font-size:10.5px;text-transform:uppercase;letter-spacing:.14em;font-weight:800;opacity:.5}
 .quote p{margin:7px 0 0;font-size:16.5px;line-height:1.42;font-weight:500}
 
@@ -209,7 +244,7 @@ header{padding:26px 0 14px}
 .facVal small{font-size:11px;font-weight:700;opacity:.45;font-family:var(--body)}
 .facName{font-family:var(--disp);font-size:17px;font-weight:800;margin-top:11px;letter-spacing:-.02em}
 .facNote{font-size:11.5px;color:var(--ink2);margin-top:3px;line-height:1.4;font-weight:500;min-height:32px}
-.facBarWrap{height:5px;background:rgba(20,18,16,.14);border-radius:99px;overflow:hidden;margin-top:9px}
+.facBarWrap{height:5px;background:var(--track);border-radius:99px;overflow:hidden;margin-top:9px}
 .facBar{display:block;height:100%;border-radius:99px;background:var(--ink);transition:width .4s ease}
 .penalty{
   grid-column:1/-1;margin-top:2px;padding:13px 15px;border-radius:var(--r2);font-size:13.5px;
@@ -229,7 +264,7 @@ header{padding:26px 0 14px}
 .dcDow{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.08em}
 .dcDate{font-size:10px;opacity:.55;margin-top:1px;font-weight:600}
 .dcScore{font-family:var(--disp);font-size:25px;font-weight:800;margin:7px 0 5px;letter-spacing:-.045em;font-variant-numeric:tabular-nums}
-.dcBar{height:4px;border-radius:99px;background:rgba(20,18,16,.16);overflow:hidden}
+.dcBar{height:4px;border-radius:99px;background:var(--track);overflow:hidden}
 .dcBar>i{display:block;height:100%;border-radius:99px;background:var(--ink)}
 .dcWx{
   white-space:nowrap;display:flex;align-items:center;justify-content:center;gap:3px;
@@ -332,11 +367,40 @@ details summary{cursor:pointer;color:var(--ink);font-size:13.5px;padding:7px 0;f
 </style>
 </head>
 <body>
+<script>
+/* Set the theme BEFORE first paint. Without this the page renders cream and
+   then flips to dark a moment later — a white flash in a dark hut at 5am,
+   which is exactly what dark mode is here to avoid. Uses a plain hour
+   heuristic; the main script refines it with the real sunrise and sunset
+   once the forecast is in. */
+(function(){
+  try{
+    var pref = localStorage.getItem("lachie.theme.v1") || "auto";
+    var dark;
+    if (pref === "dark") dark = true;
+    else if (pref === "light") dark = false;
+    else {
+      var p = new Intl.DateTimeFormat("en-NZ",{timeZone:"Pacific/Auckland",hour:"2-digit",hourCycle:"h23"}).formatToParts(new Date());
+      var h = 12;
+      for (var i=0;i<p.length;i++) if (p[i].type==="hour") h = +p[i].value;
+      dark = (h < 7 || h >= 19);
+    }
+    document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
+    var m = document.querySelector('meta[name="theme-color"]');
+    if (m) m.setAttribute("content", dark ? "#0E1613" : "#FBF6EC");
+  }catch(e){}
+})();
+</script>
 <div class="wrap">
 
 <header>
-  <h1 class="brand">The Lachie Index<span class="tm">™</span></h1>
-  <div class="place">whitebait at the Waita mouth, Haast</div>
+  <div class="headTop">
+    <div class="headId">
+      <h1 class="brand">The Lachie Index<span class="tm">™</span></h1>
+      <div class="place">whitebait at the Waita mouth, Haast</div>
+    </div>
+    <button class="themeBtn" id="themeBtn" title="Light / dark / auto">…</button>
+  </div>
   <div class="season" id="season"><span class="dot"></span><span id="seasonTxt">…</span></div>
 </header>
 
@@ -1184,6 +1248,45 @@ function renderSeason(){
   }
 }
 
+/* ===================== theme ==========================================
+   Auto follows actual darkness at the Waita, not the phone's setting — the
+   whole point is 5am, when it is pitch black outside whatever iOS thinks.
+   Real sunrise and sunset come from the forecast; a 35-minute allowance
+   either side covers usable twilight.
+   ====================================================================== */
+const THEME_KEY = "lachie.theme.v1";
+let themePref = (() => { try { return localStorage.getItem(THEME_KEY) || "auto"; } catch(e){ return "auto"; } })();
+
+function darkOutside(){
+  const now = nzNow();
+  const dw = (WX && WX.dayWx) ? WX.dayWx.get(now.date) : null;
+  const toMin = s => { const [h,m] = s.split(":").map(Number); return h*60 + m; };
+  if (dw && dw.sunrise && dw.sunset){
+    return now.min < toMin(dw.sunrise) - 35 || now.min > toMin(dw.sunset) + 35;
+  }
+  return now.min < 7*60 || now.min >= 19*60;      // before the forecast lands
+}
+
+function applyTheme(){
+  const dark = themePref === "dark" || (themePref === "auto" && darkOutside());
+  document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
+  const m = document.querySelector('meta[name="theme-color"]');
+  if (m) m.setAttribute("content", dark ? "#0E1613" : "#FBF6EC");
+  const b = document.getElementById("themeBtn");
+  if (b) b.textContent = themePref === "auto"  ? (dark ? "🌙 Auto" : "☀️ Auto")
+                       : themePref === "dark"  ? "🌙 Dark"
+                       :                         "☀️ Light";
+}
+
+document.getElementById("themeBtn").addEventListener("click", () => {
+  themePref = themePref === "auto" ? "light" : themePref === "light" ? "dark" : "auto";
+  try { localStorage.setItem(THEME_KEY, themePref); } catch(e){}
+  applyTheme();
+});
+applyTheme();
+// Flip on its own if he's watching the sky lighten at the net.
+setInterval(applyTheme, 5*60*1000);
+
 /* ===================== the book (catch log) =========================== */
 const CATCH = [
   { v:0, em:"🚫", t:"Nothing"      },
@@ -1343,6 +1446,7 @@ function rebuild(){
   }
   LONG = buildLongRange(today);
   if (!SEL || !DAYS.some(d => d.date === SEL)) SEL = today;
+  applyTheme();            // now that real sunrise/sunset are in, refine auto
   renderSeason(); render(); renderStatus();
 }
 

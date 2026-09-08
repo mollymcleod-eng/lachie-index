@@ -84,6 +84,23 @@ If that turns out to contradict the weights above, it says so, and the weights s
 The log lives in your own browser (`localStorage`). It is never uploaded anywhere. Use
 **Export** to back it up or move it to another phone.
 
+## Dark at 5am
+
+The button in the header cycles **Auto → Light → Dark** and remembers the choice.
+
+**Auto** — the default — goes dark when it is *actually dark at the Waita*, using the real sunrise
+and sunset from the forecast with a 35-minute twilight allowance either side. Not the phone's
+system setting, because the whole point is 5am, when it is pitch black outside whatever iOS thinks.
+With today's sun times that means dark at 04:00, 05:00 and 06:00, light from 06:23, and dark again
+by 20:00 — both ends of the legal fishing day covered.
+
+The theme is applied by a small inline script **before first paint**. Without that the page renders
+cream and flips a moment later — a white flash in a dark hut, which is exactly what dark mode is
+here to prevent.
+
+Dark is a straight palette swap, since every colour in the page is a token. The pastels become
+deep tints rather than staying bright: a wall of full-strength pastel at 5am would be a torch.
+
 ## Offline
 
 Haast coverage is patchy, so:
