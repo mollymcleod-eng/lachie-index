@@ -50,6 +50,56 @@ absolute number, so it measures "up on normal for this river" rather than a figu
 eyeball. Forecast days are excluded from that baseline so a coming flood can't inflate the thing
 it's being measured against.
 
+## How much to trust it
+
+Three different things, with three very different levels of confidence. Worth keeping them apart.
+
+### 1. Tides — verified against an independent source
+
+`build/verify_tides.py` compares the app's derived Waita tides against **tidetime.org's
+independently published Haast River Entrance tables** — a different source using a different
+method, so it's an external check rather than the build checking its own work.
+
+**19 tide events compared. Worst time error 6 minutes, worst height error 0.09 m.**
+
+The sharpest single test is **27 September 2026**, the daylight-saving changeover. A DST mistake
+would show up as a ~60 minute error on that date. It comes out at **1 minute**.
+
+Re-run it any time: `cd build && python verify_tides.py`. It fails loudly if the numbers drift,
+so it's worth running after every tide rebuild.
+
+### 2. Weather and sea — model output, directionally good
+
+Open-Meteo on roughly an 11 km grid, over the Southern Alps and a coastline that makes its own
+weather. Trust the *shape* — a front coming, a fresh arriving, a big swell — not the third decimal
+place. Cross-check against [MetService Haast](https://www.metservice.com/towns/haast) if a day
+looks odd.
+
+### 3. River flow — modelled, not measured
+
+This is the weakest link and worth being plain about. GloFAS is a *global model* on a ~5 km grid,
+not a gauge in the Waita. Reading it as a ratio against its own 60-day median makes it a sound
+"up on normal / settling / raging" signal, which is what the score needs — but it is not a measured
+river height.
+
+There **is** a real flow recorder in the Haast catchment, run by
+[West Coast Regional Council](https://www.wcrc.govt.nz/environment/water/river-levels-rainfall).
+It has no public API and sends no CORS headers, so a browser page cannot read it; their telemetry
+is also flagged as preliminary and not quality-controlled. For quality-assured data the contact is
+`hydrologydata@wcrc.govt.nz`. If that ever became available programmatically it would be a genuine
+accuracy upgrade over GloFAS.
+
+### 4. The weights — an opinion, not a measurement
+
+**Tide 30%, Fresh 20%, River 20%, Weather 10%, Wind/Sea 10%, Moon 10%** encodes conventional
+whitebaiting wisdom. It is not derived from data, and nobody knows whether it is right *for the
+Waita*.
+
+**The Book is the instrument that settles it.** Once there are a dozen logged sessions, the
+calibration panel reports the rank correlation between predicted and actual, and which factor
+genuinely separates the good days from the quiet ones. If a factor turns out to work backwards,
+it says so. At that point the weights should change to match the river, and the river wins.
+
 ## How the score works
 
 Each **high tide** is scored separately over a window running from 3 hours before high water
