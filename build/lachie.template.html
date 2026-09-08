@@ -1,0 +1,1063 @@
+<!doctype html>
+<html lang="en-NZ">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0c1411">
+<title>The Lachie Index — Waita River, Haast</title>
+<meta name="description" content="Daily whitebaiting conditions score for the Waita River mouth, Haast — LINZ tides, rain, river level, swell and moon.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="favicon-32.png" sizes="32x32">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Lachie Index">
+<style>
+:root{
+  --bg:#0c1411; --bg2:#111d18; --panel:#16241e; --panel2:#1b2c25;
+  --line:#263a31; --line2:#334c40;
+  --ink:#e9f2ec; --mute:#93a89e; --mute2:#6d8378;
+  --red:#f0524d; --orange:#f5883b; --yellow:#e8c33c; --green:#4fc46b; --electric:#3ddbd0;
+  --shadow:0 2px 14px rgba(0,0,0,.45);
+  --r:14px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font:16px/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+.wrap{max-width:640px;margin:0 auto;padding:0 14px 56px}
+h1,h2,h3{margin:0;font-weight:650;letter-spacing:-.01em}
+button{font:inherit;color:inherit}
+
+/* ---------- header ---------- */
+header{padding:20px 0 12px;text-align:center}
+.brand{font-size:26px;font-weight:800;letter-spacing:-.02em;line-height:1.15}
+.brand .tm{font-size:11px;vertical-align:super;opacity:.55;font-weight:600}
+.place{color:var(--mute);font-size:13px;margin-top:5px}
+.season{
+  display:inline-flex;align-items:center;gap:7px;margin-top:11px;
+  padding:5px 12px;border-radius:999px;font-size:12.5px;font-weight:600;
+  background:var(--panel);border:1px solid var(--line)
+}
+.season.open{color:var(--green)}
+.season.shut{color:var(--mute)}
+.dot{width:7px;height:7px;border-radius:50%;background:currentColor;flex:none}
+
+/* ---------- hero ---------- */
+.hero{
+  background:linear-gradient(170deg,var(--panel2),var(--panel));
+  border:1px solid var(--line);border-radius:20px;padding:20px 18px;margin-top:14px;
+  box-shadow:var(--shadow);position:relative;overflow:hidden
+}
+.hero::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(120% 80% at 50% -20%,var(--glow,transparent),transparent 62%);opacity:.5
+}
+.hero>*{position:relative}
+.heroTop{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.heroDay{font-size:13px;color:var(--mute);font-weight:600}
+.heroNav{display:flex;gap:6px}
+.navBtn{
+  background:var(--panel2);border:1px solid var(--line2);border-radius:8px;
+  width:30px;height:28px;cursor:pointer;font-size:14px;line-height:1;
+  display:grid;place-items:center;color:var(--mute)
+}
+.navBtn:hover:not(:disabled){color:var(--ink);border-color:var(--mute2)}
+.navBtn:disabled{opacity:.3;cursor:default}
+.scoreRow{display:flex;align-items:flex-end;gap:12px;margin:6px 0 2px}
+.score{font-size:76px;line-height:.88;font-weight:800;letter-spacing:-.045em;font-variant-numeric:tabular-nums}
+.outof{font-size:19px;color:var(--mute);font-weight:600;padding-bottom:10px}
+.verdictBadge{
+  display:inline-block;margin-top:10px;padding:7px 14px;border-radius:999px;
+  font-size:14.5px;font-weight:800;letter-spacing:.03em;
+  background:var(--badgeBg);color:var(--badgeFg);border:1px solid var(--badgeLine)
+}
+.quote{
+  margin-top:15px;padding:13px 15px;background:rgba(0,0,0,.24);
+  border-left:3px solid var(--accent,var(--green));border-radius:0 10px 10px 0
+}
+.quote .who{font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--mute2);font-weight:700}
+.quote p{margin:5px 0 0;font-size:15.5px;line-height:1.45}
+
+/* ---------- generic panel ---------- */
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:15px;margin-top:14px}
+.panelHead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:11px}
+.panelHead h2{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--mute)}
+.hint{font-size:12px;color:var(--mute2)}
+
+/* ---------- windows ---------- */
+.win{
+  display:flex;align-items:center;gap:13px;padding:12px;border-radius:11px;
+  background:var(--panel2);border:1px solid var(--line);margin-bottom:9px
+}
+.win:last-child{margin-bottom:0}
+.win.best{border-color:var(--accent);background:linear-gradient(90deg,rgba(79,196,107,.09),var(--panel2))}
+.winScore{
+  font-size:23px;font-weight:800;width:52px;flex:none;text-align:center;
+  font-variant-numeric:tabular-nums;line-height:1.05
+}
+.winScore small{display:block;font-size:9.5px;font-weight:700;letter-spacing:.06em;color:var(--mute2);text-transform:uppercase}
+.winBody{flex:1;min-width:0}
+.winTime{font-size:17px;font-weight:700;font-variant-numeric:tabular-nums}
+.winMeta{font-size:12.5px;color:var(--mute);margin-top:2px}
+.winTag{
+  font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
+  padding:3px 8px;border-radius:999px;flex:none
+}
+
+/* ---------- factors ---------- */
+.fac{display:grid;grid-template-columns:26px 1fr 42px;gap:11px;align-items:center;padding:8px 0;cursor:pointer}
+.fac+.fac{border-top:1px solid var(--line)}
+.facIcon{font-size:17px;text-align:center}
+.facName{font-size:14px;font-weight:600}
+.facNote{font-size:12px;color:var(--mute);margin-top:2px}
+.facBarWrap{height:6px;background:rgba(0,0,0,.35);border-radius:99px;overflow:hidden;margin-top:6px}
+.facBar{height:100%;border-radius:99px;transition:width .35s ease}
+.facVal{font-size:16px;font-weight:800;text-align:right;font-variant-numeric:tabular-nums}
+.facVal small{font-size:10px;color:var(--mute2);font-weight:600}
+.penalty{
+  margin-top:11px;padding:9px 12px;border-radius:10px;font-size:13px;
+  background:rgba(240,82,77,.11);border:1px solid rgba(240,82,77,.32);color:#ffb3b0
+}
+.penalty b{color:var(--red)}
+
+/* ---------- outlook ---------- */
+.strip{display:flex;gap:8px;overflow-x:auto;padding:2px 0 6px;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+.dayCard{
+  flex:none;width:66px;padding:10px 6px;border-radius:11px;text-align:center;cursor:pointer;
+  background:var(--panel2);border:1px solid var(--line);transition:transform .12s
+}
+.dayCard:hover{transform:translateY(-2px)}
+.dayCard.sel{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink) inset}
+.dayCard.out{opacity:.4}
+.dcDow{font-size:10.5px;color:var(--mute);font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.dcDate{font-size:10px;color:var(--mute2);margin-top:1px}
+.dcScore{font-size:21px;font-weight:800;margin:5px 0 3px;font-variant-numeric:tabular-nums}
+.dcBar{height:4px;border-radius:99px;background:rgba(0,0,0,.35);overflow:hidden}
+.dcBar>i{display:block;height:100%;border-radius:99px}
+.dcTime{font-size:9.5px;color:var(--mute2);margin-top:5px;font-variant-numeric:tabular-nums}
+
+/* ---------- log ---------- */
+.field{margin-bottom:11px}
+.field label{display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--mute);font-weight:700;margin-bottom:5px}
+input,select,textarea{
+  width:100%;background:var(--bg2);border:1px solid var(--line2);border-radius:9px;
+  padding:10px;color:var(--ink);font:inherit;font-size:15px
+}
+textarea{resize:vertical;min-height:56px}
+input:focus,select,textarea:focus{outline:2px solid var(--green);outline-offset:-1px}
+.catchBtns{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.cb{
+  padding:9px 3px;border-radius:9px;background:var(--bg2);border:1px solid var(--line2);
+  cursor:pointer;text-align:center;font-size:10.5px;font-weight:700;line-height:1.25;color:var(--mute)
+}
+.cb .em{display:block;font-size:17px;margin-bottom:3px}
+.cb.on{background:var(--green);color:#06120a;border-color:var(--green)}
+.btn{
+  width:100%;padding:12px;border-radius:10px;border:1px solid var(--green);
+  background:var(--green);color:#06120a;font-weight:800;cursor:pointer;font-size:15px
+}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent;color:var(--mute);border-color:var(--line2);font-weight:600}
+.btn.ghost:hover{color:var(--ink);border-color:var(--mute2);filter:none}
+.btnRow{display:flex;gap:8px;margin-top:10px}
+.entry{display:flex;gap:11px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line)}
+.entry:first-child{border-top:0}
+.entryEm{font-size:19px;flex:none;width:24px;text-align:center}
+.entryBody{flex:1;min-width:0}
+.entryTop{display:flex;justify-content:space-between;gap:8px;font-size:13.5px;font-weight:600}
+.entryMeta{font-size:12px;color:var(--mute);margin-top:2px}
+.entryNote{font-size:12.5px;color:var(--mute);margin-top:4px;font-style:italic}
+.del{background:none;border:0;color:var(--mute2);cursor:pointer;font-size:15px;padding:0 3px;flex:none}
+.del:hover{color:var(--red)}
+.empty{text-align:center;color:var(--mute2);font-size:13.5px;padding:16px 8px;line-height:1.55}
+
+/* ---------- calibration ---------- */
+.calRow{display:flex;align-items:center;gap:10px;padding:7px 0;font-size:13px}
+.calRow+.calRow{border-top:1px solid var(--line)}
+.calLabel{width:96px;flex:none;color:var(--mute);font-size:12.5px}
+.calBarWrap{display:block;flex:1;height:16px;background:rgba(0,0,0,.3);border-radius:5px;overflow:hidden;position:relative}
+.calBar{display:block;height:100%;border-radius:5px}
+.calNum{width:56px;text-align:right;font-variant-numeric:tabular-nums;font-weight:700;font-size:13px;flex:none}
+.insight{
+  margin-top:12px;padding:11px 13px;border-radius:10px;font-size:13.5px;line-height:1.5;
+  background:rgba(61,219,208,.08);border:1px solid rgba(61,219,208,.26)
+}
+.insight b{color:var(--electric)}
+
+/* ---------- status / footer ---------- */
+.status{
+  display:flex;align-items:center;gap:8px;justify-content:center;
+  font-size:12px;color:var(--mute2);margin-top:14px;text-align:center;flex-wrap:wrap
+}
+.status.warn{color:var(--orange)}
+.status button{background:none;border:0;color:var(--mute);text-decoration:underline;cursor:pointer;font-size:12px;padding:0}
+footer{margin-top:22px;padding-top:16px;border-top:1px solid var(--line);font-size:11.5px;color:var(--mute2);line-height:1.65}
+footer a{color:var(--mute);text-decoration:underline}
+footer h3{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--mute);margin-bottom:6px}
+details summary{cursor:pointer;color:var(--mute);font-size:12.5px;padding:5px 0}
+.skel{color:var(--mute2);text-align:center;padding:22px;font-size:14px}
+@media (max-width:380px){ .score{font-size:62px} .brand{font-size:22px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1 class="brand">🐟 THE LACHIE INDEX<span class="tm">™</span></h1>
+  <div class="place">Waita River mouth · Haast · South Westland</div>
+  <div class="season" id="season"><span class="dot"></span><span id="seasonTxt">…</span></div>
+</header>
+
+<div id="app"><div class="skel">Reading the river…</div></div>
+
+<div class="status" id="status"></div>
+
+<!-- ============ CATCH LOG ============ -->
+<section class="panel">
+  <div class="panelHead">
+    <h2>The Book</h2>
+    <span class="hint" id="logCount"></span>
+  </div>
+  <div class="field">
+    <label for="lgDate">Day fished</label>
+    <input type="date" id="lgDate">
+  </div>
+  <div class="field">
+    <label>How'd it go?</label>
+    <div class="catchBtns" id="catchBtns"></div>
+  </div>
+  <div class="field">
+    <label for="lgNote">Notes <span style="text-transform:none;letter-spacing:0;font-weight:400">(optional)</span></label>
+    <textarea id="lgNote" placeholder="Fished the last two hours of the incoming. Bait came in a rush about 20 minutes before the top…"></textarea>
+  </div>
+  <button class="btn" id="lgSave">Write it in the book</button>
+  <div class="btnRow">
+    <button class="btn ghost" id="lgExport">Export</button>
+    <button class="btn ghost" id="lgImport">Import</button>
+  </div>
+  <div id="logList" style="margin-top:14px"></div>
+</section>
+
+<!-- ============ CALIBRATION ============ -->
+<section class="panel" id="calPanel"></section>
+
+<footer>
+  <h3>Where the numbers come from</h3>
+  <p>
+    <b>Tides</b> — LINZ official predictions for Westport, converted to
+    <b>Haast River Entrance</b> using LINZ's own published secondary-port correction
+    (port 6519: high and low water <b>+30 min</b>, range ratio <b>0.70</b> about mean sea level).
+    Times are local wall clock with daylight saving already applied, exactly as LINZ publishes them.
+    Two years are stored in this page, so tides and moon work with no signal at all.
+  </p>
+  <p>
+    <b>Rain, cloud, wind</b> — Open-Meteo forecast API.
+    <b>River flow</b> — Open-Meteo flood API (Copernicus GloFAS discharge for the Waita catchment),
+    read as a ratio against the median of its own last 60 observed days rather than as an absolute
+    level, so it measures “up on normal for this river” instead of a number nobody can eyeball.
+    <b>Swell and sea</b> — Open-Meteo marine API. <b>Moon</b> — computed in this page.
+  </p>
+  <details>
+    <summary>How the score is built</summary>
+    <p id="weightsTxt"></p>
+    <p>
+      Each fishable high tide gets its own score; the day takes the best one. A window is only
+      counted if it falls inside legal whitebaiting hours. Penalties for flood, drought and a
+      dangerous mouth are subtracted after the weighted total, so one genuinely bad factor can
+      sink an otherwise tidy-looking day.
+    </p>
+  </details>
+  <p style="margin-top:12px">
+    Whitebait season: <b>1 September – 30 October</b>. Fishing hours <b>5am–8pm</b> NZST,
+    <b>6am–9pm</b> NZDT once daylight saving starts. Check
+    <a href="https://www.doc.govt.nz/whitebaiting" target="_blank" rel="noopener">DOC</a> for the current rules —
+    they change, and this page does not.
+  </p>
+  <p style="margin-top:10px;color:var(--mute2)">
+    A forecast, not a promise. Whitebait can't read. Built for Lachie.
+  </p>
+</footer>
+
+</div>
+
+<script>
+"use strict";
+
+/* =====================================================================
+   THE LACHIE INDEX
+   Waita River mouth, Haast (-43.7826, 169.1174)
+   ===================================================================== */
+
+const SITE = { lat: -43.7826, lon: 169.1174 };
+
+/* --- tide data: LINZ Westport, corrected to Haast River Entrance ------ */
+const TIDE_RAW = __TIDE_DATA__;
+
+/* --- scoring weights (sum to 1) -------------------------------------- */
+const W = { tide:.30, fresh:.20, river:.20, cloud:.10, moon:.10, sea:.10 };
+const FACTORS = [
+  { k:"tide",  icon:"🌊", name:"Tide"     },
+  { k:"fresh", icon:"🌧️", name:"Fresh"    },
+  { k:"river", icon:"📈", name:"River"    },
+  { k:"cloud", icon:"☁️", name:"Weather"  },
+  { k:"sea",   icon:"🌬️", name:"Wind / Sea" },
+  { k:"moon",  icon:"🌙", name:"Moon"     }
+];
+
+const BANDS = [
+  { min:9,   label:"CODE WHITEBAIT",   emoji:"🚨", col:"var(--electric)", bg:"rgba(61,219,208,.14)",  line:"rgba(61,219,208,.5)"  },
+  { min:7,   label:"GET THE NET",      emoji:"🟢", col:"var(--green)",    bg:"rgba(79,196,107,.14)",  line:"rgba(79,196,107,.5)"  },
+  { min:5,   label:"WORTH A LOOK",     emoji:"🟡", col:"var(--yellow)",   bg:"rgba(232,195,60,.14)",  line:"rgba(232,195,60,.5)"  },
+  { min:3,   label:"YOU'D HAVE TO BE KEEN", emoji:"🟠", col:"var(--orange)", bg:"rgba(245,136,59,.14)", line:"rgba(245,136,59,.5)" },
+  { min:-99, label:"DON'T BOTHER",     emoji:"🔴", col:"var(--red)",      bg:"rgba(240,82,77,.14)",   line:"rgba(240,82,77,.5)"   }
+];
+const band = s => BANDS.find(b => s >= b.min);
+
+/* ===================== time helpers (NZ wall clock) =================== */
+const NZ = "Pacific/Auckland";
+const _fmt = new Intl.DateTimeFormat("en-NZ", {
+  timeZone: NZ, year:"numeric", month:"2-digit", day:"2-digit",
+  hour:"2-digit", minute:"2-digit", hourCycle:"h23"
+});
+function nzNow(){
+  const p = {};
+  for (const {type,value} of _fmt.formatToParts(new Date())) p[type] = value;
+  return { date:`${p.year}-${p.month}-${p.day}`, min:(+p.hour)*60 + (+p.minute) };
+}
+const pad = n => String(n).padStart(2,"0");
+const hhmm = m => `${pad(Math.floor(((m%1440)+1440)%1440/60))}:${pad(((m%60)+60)%60)}`;
+function addDays(d, n){
+  const [y,m,dd] = d.split("-").map(Number);
+  const t = new Date(Date.UTC(y, m-1, dd + n));
+  return `${t.getUTCFullYear()}-${pad(t.getUTCMonth()+1)}-${pad(t.getUTCDate())}`;
+}
+const dayDiff = (a,b) => Math.round((Date.parse(a+"T00:00:00Z") - Date.parse(b+"T00:00:00Z")) / 864e5);
+const dowOf = d => ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][new Date(d+"T00:00:00Z").getUTCDay()];
+
+/* NZDT runs from the last Sunday in September to the first Sunday in April. */
+function isNZDT(date){
+  const [y,m,d] = date.split("-").map(Number);
+  const lastSunSep = yy => { const t = new Date(Date.UTC(yy,8,30)); while (t.getUTCDay()!==0) t.setUTCDate(t.getUTCDate()-1); return t.getUTCDate(); };
+  const firstSunApr = yy => { const t = new Date(Date.UTC(yy,3,1));  while (t.getUTCDay()!==0) t.setUTCDate(t.getUTCDate()+1); return t.getUTCDate(); };
+  if (m > 9 || m < 4) return true;
+  if (m === 9) return d >= lastSunSep(y);
+  if (m === 4) return d <  firstSunApr(y);
+  return false;
+}
+const legalHours = date => isNZDT(date) ? {from:6*60, to:21*60} : {from:5*60, to:20*60};
+const inSeason = date => { const m = +date.slice(5,7); return m === 9 || m === 10; };
+
+/* ===================== tides ========================================== */
+const TIDES = (() => {
+  const parsed = JSON.parse(TIDE_RAW);
+  const days = parsed.days.split(";");
+  const map = new Map();
+  days.forEach((s, i) => {
+    if (!s) return;
+    map.set(addDays(parsed.start, i), s.split(",").map(e => {
+      const [m,h] = e.split(":");
+      return { min:+m, h:+h/10 };
+    }));
+  });
+  return { map, start:parsed.start, end:addDays(parsed.start, days.length-1) };
+})();
+
+/* High tides on `date`, each with the preceding low so we can measure range. */
+function highTides(date){
+  const today = TIDES.map.get(date);
+  if (!today) return [];
+  const prev = TIDES.map.get(addDays(date,-1)) || [];
+  // Flatten with minute offsets so "previous event" can live on yesterday.
+  const seq = [...prev.map(e => ({...e, min:e.min-1440})), ...today.map(e => ({...e}))];
+  const out = [];
+  for (let i = 0; i < seq.length; i++){
+    const e = seq[i];
+    if (e.min < 0 || e.min >= 1440) continue;          // must fall on `date`
+    const before = seq[i-1], after = seq[i+1];
+    const isHigh = (!before || e.h > before.h) && (!after || e.h > after.h);
+    if (!isHigh) continue;
+    const range = before ? e.h - before.h : null;
+    out.push({ min:e.min, h:e.h, range, lowMin: before ? before.min : null });
+  }
+  return out;
+}
+
+/* ===================== moon =========================================== */
+function moon(date){
+  // Days since the reference new moon of 6 Jan 2000 18:14 UTC.
+  const t = Date.parse(date + "T12:00:00Z");
+  const days = (t - Date.parse("2000-01-06T18:14:00Z")) / 864e5;
+  const SYN = 29.530588853;
+  let ph = (days / SYN) % 1; if (ph < 0) ph += 1;      // 0 = new, .5 = full
+  const illum = (1 - Math.cos(2*Math.PI*ph)) / 2;
+  // Spring tides sit near new AND full; |cos| peaks at both.
+  const springiness = Math.abs(Math.cos(2*Math.PI*ph));
+  const names = ["New","Waxing crescent","First quarter","Waxing gibbous","Full","Waning gibbous","Last quarter","Waning crescent"];
+  const glyph = ["🌑","🌒","🌓","🌔","🌕","🌖","🌗","🌘"];
+  const i = Math.round(ph*8) % 8;
+  return { phase:ph, illum, springiness, name:names[i], glyph:glyph[i] };
+}
+
+/* ===================== maths helpers ================================== */
+function piece(x, pts){
+  if (x <= pts[0][0]) return pts[0][1];
+  for (let i = 1; i < pts.length; i++){
+    if (x <= pts[i][0]){
+      const [x0,y0] = pts[i-1], [x1,y1] = pts[i];
+      return y0 + (y1-y0) * (x-x0) / (x1-x0);
+    }
+  }
+  return pts[pts.length-1][1];
+}
+const clamp = (v,a,b) => Math.min(b, Math.max(a,v));
+const median = a => { const s = [...a].sort((x,y)=>x-y); const n = s.length; return n ? (n%2 ? s[(n-1)/2] : (s[n/2-1]+s[n/2])/2) : null; };
+const round1 = v => Math.round(v*10)/10;
+
+/* ===================== live data ====================================== */
+const CACHE_KEY = "lachie.wx.v1";
+const LOG_KEY   = "lachie.log.v1";
+let WX = null;                 // { hours:Map, riverByDate:Map, riverBase, sea:Map, fetchedAt }
+let DATA_MODE = "loading";     // loading | live | cached | tideonly
+
+async function getJSON(url){
+  const r = await fetch(url);
+  if (!r.ok) throw new Error("HTTP " + r.status);
+  const j = await r.json();
+  if (j.error) throw new Error(j.reason || "api error");
+  return j;
+}
+
+async function loadWeather(){
+  const q = `latitude=${SITE.lat}&longitude=${SITE.lon}`;
+  // The weather feed is essential; river and sea are each optional, so one
+  // endpoint being down degrades a single factor instead of the whole page.
+  const [wx, fl, mar] = await Promise.allSettled([
+    getJSON(`https://api.open-meteo.com/v1/forecast?${q}&hourly=precipitation,cloud_cover,wind_speed_10m,wind_direction_10m,temperature_2m&past_days=10&forecast_days=8&timezone=Pacific%2FAuckland`),
+    getJSON(`https://flood-api.open-meteo.com/v1/flood?${q}&daily=river_discharge&past_days=60&forecast_days=8`),
+    getJSON(`https://marine-api.open-meteo.com/v1/marine?${q}&hourly=wave_height,swell_wave_height&past_days=2&forecast_days=8&timezone=Pacific%2FAuckland`)
+  ]);
+  if (wx.status !== "fulfilled") throw wx.reason;
+  const ok = r => r.status === "fulfilled" ? r.value : null;
+  return packWeather(wx.value, ok(fl), ok(mar));
+}
+
+function packWeather(wx, fl, mar){
+  const h = wx.hourly, idx = new Map();
+  h.time.forEach((t,i) => idx.set(t, i));
+  const seaIdx = new Map();
+  if (mar && mar.hourly) mar.hourly.time.forEach((t,i) => seaIdx.set(t, i));
+
+  // "Normal" flow is the median of the observed record, i.e. the past_days
+  // window only. Forecast days are excluded so a coming flood cannot inflate
+  // the baseline it is meant to be measured against.
+  const riverByDate = new Map();
+  let riverBase = null;
+  if (fl && fl.daily){
+    fl.daily.time.forEach((d,i) => { const v = fl.daily.river_discharge[i]; if (v != null) riverByDate.set(d, v); });
+    const today = nzNow().date;
+    const past = [...riverByDate.entries()].filter(([d]) => d < today).map(e => e[1]);
+    riverBase = median(past.length >= 10 ? past : [...riverByDate.values()]);
+  }
+
+  return {
+    idx, h, seaIdx, mar,
+    riverByDate, riverBase,
+    fetchedAt: Date.now(),
+    raw: { wx, fl, mar }
+  };
+}
+
+function saveCache(){
+  try { localStorage.setItem(CACHE_KEY, JSON.stringify({ at:WX.fetchedAt, raw:WX.raw })); } catch(e){}
+}
+function loadCache(){
+  try {
+    const c = JSON.parse(localStorage.getItem(CACHE_KEY) || "null");
+    if (!c || !c.raw) return null;
+    const p = packWeather(c.raw.wx, c.raw.fl, c.raw.mar);
+    p.fetchedAt = c.at;
+    return p;
+  } catch(e){ return null; }
+}
+
+/* Aggregate hourly values across an inclusive-exclusive minute window. */
+function hourSlice(date, fromMin, toMin){
+  if (!WX) return null;
+  const vals = { rain:0, cloud:[], wind:[], gustDir:[], temp:[], n:0 };
+  for (let m = Math.floor(fromMin/60)*60; m < toMin; m += 60){
+    const d = addDays(date, Math.floor(m/1440));
+    const hr = ((m % 1440) + 1440) % 1440 / 60;
+    const i = WX.idx.get(`${d}T${pad(hr)}:00`);
+    if (i == null) continue;
+    vals.rain  += WX.h.precipitation[i] ?? 0;
+    if (WX.h.cloud_cover[i]    != null) vals.cloud.push(WX.h.cloud_cover[i]);
+    if (WX.h.wind_speed_10m[i] != null) vals.wind.push(WX.h.wind_speed_10m[i]);
+    if (WX.h.wind_direction_10m[i] != null) vals.gustDir.push(WX.h.wind_direction_10m[i]);
+    if (WX.h.temperature_2m[i] != null) vals.temp.push(WX.h.temperature_2m[i]);
+    vals.n++;
+  }
+  return vals.n ? vals : null;
+}
+function seaSlice(date, fromMin, toMin){
+  if (!WX || !WX.mar) return null;
+  const wav = [], swl = [];
+  for (let m = Math.floor(fromMin/60)*60; m < toMin; m += 60){
+    const d = addDays(date, Math.floor(m/1440));
+    const hr = ((m % 1440) + 1440) % 1440 / 60;
+    const i = WX.seaIdx.get(`${d}T${pad(hr)}:00`);
+    if (i == null) continue;
+    const a = WX.mar.hourly.wave_height[i], b = WX.mar.hourly.swell_wave_height[i];
+    if (a != null) wav.push(a);
+    if (b != null) swl.push(b);
+  }
+  return wav.length ? { wave:Math.max(...wav), swell: swl.length ? Math.max(...swl) : null } : null;
+}
+const mean = a => a.length ? a.reduce((x,y)=>x+y,0)/a.length : null;
+
+/* ===================== the scoring engine ============================= */
+function scoreWindow(date, ht){
+  const lh = legalHours(date);
+  const startRaw = ht.min - 180;                 // three hours before high water
+  const endRaw   = ht.min + 30;                  // through the top
+  const start = Math.max(startRaw, lh.from);
+  const end   = Math.min(endRaw,   lh.to);
+  const usable = end - start;
+  if (usable < 60) return null;                  // not enough legal water to bother
+
+  const f = {}, notes = {}, pen = [];
+
+  /* --- TIDE: range drives how hard the water pushes upriver ---------- */
+  const range = ht.range != null ? ht.range : (ht.h - 0.6);
+  f.tide = clamp(piece(range, [[0.8,1],[1.1,3],[1.4,5.5],[1.7,7.5],[1.95,9.2],[2.2,10]]), 0, 10);
+  // A window cut short by legal hours is worth less than a full one.
+  const fullness = usable / (endRaw - startRaw);
+  if (fullness < 1) f.tide *= (0.55 + 0.45*fullness);
+  notes.tide = `${range.toFixed(1)} m range · high ${hhmm(ht.min)} at ${ht.h.toFixed(1)} m`
+             + (fullness < 1 ? " · clipped by legal hours" : "");
+
+  /* --- FRESH: useful rain 12–48 h before the window ------------------ */
+  const back = hourSlice(date, start-48*60, start-12*60);
+  const recent = hourSlice(date, start-12*60, start);
+  if (back){
+    const r = back.rain;
+    f.fresh = clamp(piece(r, [[0,1],[1,3],[3,5],[6,7.5],[10,10],[45,10],[70,8],[110,6],[160,4],[220,2]]), 0, 10);
+    // A deluge in the last 12 h means it is still coming up dirty.
+    if (recent && recent.rain > 40) f.fresh = Math.min(f.fresh, 6);
+    notes.fresh = `${r.toFixed(0)} mm in the 12–48 h before`
+                + (recent ? ` · ${recent.rain.toFixed(0)} mm since` : "");
+  }
+
+  /* --- RIVER: level and trend, relative to its own baseline ---------- */
+  const q = (WX && WX.riverBase) ? WX.riverByDate.get(date) : null;
+  const qPrev = (WX && WX.riverBase) ? WX.riverByDate.get(addDays(date,-1)) : null;
+  if (q != null){
+    const ratio = q / WX.riverBase;
+    const rising = qPrev != null ? (q - qPrev) / Math.max(qPrev, .01) : 0;
+    let s;
+    if (ratio < 0.75)      s = piece(ratio, [[0.4,1.5],[0.75,4]]);
+    else if (ratio < 1.15) s = piece(ratio, [[0.75,4],[1.15,7]]);
+    else if (ratio < 1.7)  s = piece(ratio, [[1.15,7],[1.7,10]]);
+    else if (ratio < 2.6)  s = piece(ratio, [[1.7,10],[2.6,6.5]]);
+    else if (ratio < 4)    s = piece(ratio, [[2.6,6.5],[4,2.5]]);
+    else                   s = piece(ratio, [[4,2.5],[7,0.5]]);
+    // Falling or steady in the good band is the classic "settling" pattern.
+    if (ratio >= 1.15 && ratio < 2.6) s += rising < -0.05 ? 0.8 : (rising > 0.25 ? -1.6 : 0.3);
+    else if (ratio >= 2.6 && rising > 0.1) s -= 1.2;
+    f.river = clamp(s, 0, 10);
+
+    const dirn = rising > 0.08 ? "rising" : rising < -0.08 ? "falling" : "steady";
+    notes.river = `${q.toFixed(1)} m³/s · ${ratio.toFixed(2)}× normal · ${dirn}`;
+
+    if (ratio >= 4) pen.push({ n:3, why:"River's in flood — it'll be a brown raging mess" });
+    else if (ratio < 0.75){
+      const dry = hourSlice(date, start-7*24*60, start);
+      if (dry && dry.rain < 10) pen.push({ n:2, why:"River's low and clear after a dry spell" });
+    }
+  }
+
+  /* --- WEATHER: dull is good ---------------------------------------- */
+  const win = hourSlice(date, start, end);
+  if (win){
+    const cl = mean(win.cloud);
+    let s = piece(cl, [[0,2],[30,4],[60,7],[85,9.3],[100,10]]);
+    const rate = win.rain / Math.max(1, (end-start)/60);
+    if (rate > 0.1 && rate < 1.2) s += 0.5;      // soft drizzle, classic
+    if (rate > 4) s -= 1.2;                       // hosing down, river climbing
+    f.cloud = clamp(s, 0, 10);
+    const t = mean(win.temp);
+    notes.cloud = `${Math.round(cl)}% cloud${t!=null ? ` · ${t.toFixed(0)}°C` : ""}`
+                + (win.rain > 0.3 ? ` · ${win.rain.toFixed(1)} mm during` : " · dry");
+  }
+
+  /* --- WIND / SEA: is the mouth workable ----------------------------- */
+  const sea = seaSlice(date, start, end);
+  if (win || sea){
+    const wind = win ? Math.max(...win.wind) : null;
+    const wave = sea ? sea.wave : null;
+    let s = 10;
+    if (wave != null) s = Math.min(s, piece(wave, [[0.8,10],[1.5,8.5],[2.2,6.5],[3,4],[3.8,1.5],[5,0]]));
+    if (wind != null) s = Math.min(s, piece(wind, [[10,10],[22,8.5],[32,6],[45,3],[60,0]]));
+    // Onshore westerlies stand the bar up.
+    if (win && wind != null && wind > 25){
+      const dir = mean(win.gustDir);
+      if (dir != null && dir > 215 && dir < 325) s -= 1.2;
+    }
+    f.sea = clamp(s, 0, 10);
+    notes.sea = [ wind!=null ? `${Math.round(wind)} km/h wind` : null,
+                  wave!=null ? `${wave.toFixed(1)} m sea` : null ].filter(Boolean).join(" · ");
+    if ((wave != null && wave >= 3.5) || (wind != null && wind >= 50))
+      pen.push({ n:2, why:"Rough out there — mouth could be genuinely dangerous" });
+  }
+
+  /* --- MOON ---------------------------------------------------------- */
+  const mn = moon(date);
+  f.moon = clamp(2 + 8*Math.pow(mn.springiness, 1.3), 0, 10);
+  notes.moon = `${mn.glyph} ${mn.name} · ${Math.round(mn.illum*100)}% lit`;
+
+  /* --- combine ------------------------------------------------------- */
+  let wsum = 0, tot = 0;
+  for (const k in W) if (f[k] != null){ tot += f[k]*W[k]; wsum += W[k]; }
+  if (!wsum) return null;
+  let score = tot / wsum;                          // renormalise over what we have
+  const penTotal = pen.reduce((a,b) => a+b.n, 0);
+  score = clamp(score - penTotal, 0, 10);
+
+  return {
+    date, start, end, htMin:ht.min, htH:ht.h, range,
+    f, notes, pen, moon:mn,
+    score: round1(score),
+    complete: wsum > 0.99
+  };
+}
+
+function scoreDay(date){
+  const wins = highTides(date).map(ht => scoreWindow(date, ht)).filter(Boolean);
+  if (!wins.length) return { date, windows:[], score:null };
+  wins.sort((a,b) => b.score - a.score);
+  return { date, windows:wins, best:wins[0], score:wins[0].score };
+}
+
+/* ===================== Lachie's verdict =============================== */
+function hash(s){ let h = 2166136261; for (let i=0;i<s.length;i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return Math.abs(h); }
+const pick = (arr, seed) => arr[hash(seed) % arr.length];
+
+function verdict(day){
+  if (!day.best) return "No fishable tide inside legal hours. Have the day off.";
+  const w = day.best, f = w.f, s = day.score, seed = day.date;
+
+  const opener = pick(
+    s >= 9 ? ["Drop everything.","Right — that's the one.","Don't muck about."]
+  : s >= 7 ? ["That'll do nicely.","Worth getting the good net out.","Solid signs."]
+  : s >= 5 ? ["Not flash, not hopeless.","Worth a sit.","Fair enough for a look."]
+  : s >= 3 ? ["You'd have to be keen.","Bit of a punt, this one.","Slim on paper."]
+  :          ["Save your legs.","Coffee-at-the-hut day.","Not today."], seed+"o");
+
+  // Talk about what actually moved the number.
+  const rank = Object.keys(f).sort((a,b) => (f[b]-5)*W[b] - (f[a]-5)*W[a]);
+  const good = rank.filter(k => f[k] >= 7).slice(0,2);
+  const bad  = rank.reverse().filter(k => f[k] <= 4).slice(0,2);
+
+  const G = {
+    tide: () => pick(["a big tide pushing in","a proper tide behind it","plenty of water coming in"], seed+"gt"),
+    fresh:() => pick(["good fresh on it","a decent fresh through","nice bit of rain in it"], seed+"gf"),
+    river:() => pick(["river up and settling","river's sitting about right","river's carrying a bit of colour"], seed+"gr"),
+    cloud:() => pick(["nice bit of cloud about","dull enough","good grey day"], seed+"gc"),
+    sea:  () => pick(["mouth should be settled","sea's behaving","bar looks workable"], seed+"gs"),
+    moon: () => pick([`springs around the ${w.moon.name.toLowerCase()} moon`,"moon's in the right place"], seed+"gm")
+  };
+  const B = {
+    tide: () => pick(["only a wee neap tide","not much tide to speak of","tide's gutless"], seed+"bt"),
+    fresh:() => pick(["been dry, no fresh at all","nothing's come down lately","river hasn't been freshened"], seed+"bf"),
+    river:() => (f.river <= 2 ? pick(["river's a brown mess","she's raging"], seed+"br1")
+                              : pick(["river's low and gin clear","not enough water in it"], seed+"br2")),
+    cloud:() => pick(["bluebird day — bait'll hug the bank","bright as, which never helps","too much sun on it"], seed+"bc"),
+    sea:  () => pick(["mouth'll be a handful","sea's up and angry","bar's going to be ugly"], seed+"bs"),
+    moon: () => pick(["moon's all wrong","neap phase, so nothing much doing"], seed+"bm")
+  };
+
+  const parts = [];
+  if (good.length) parts.push(good.map(k => G[k]()).join(", "));
+  if (bad.length)  parts.push((good.length ? "but " : "") + bad.map(k => B[k]()).join(" and "));
+  let body = parts.join(", ");
+  if (!body) body = "everything's middling";
+  body = body.charAt(0).toUpperCase() + body.slice(1);
+
+  const closer = pick(
+    s >= 7 ? ["If there aren't bait there, blame the bait.","Take the good net.","Don't tell the neighbours.","Be there early."]
+  : s >= 4 ? ["Take a thermos either way.","Worse ways to spend a morning.","You've fished worse."]
+  :          ["The hut's still warm.","Bait can't read a forecast though.","Save it for a better tide."], seed+"c");
+
+  return `${opener} ${body}. ${closer}`;
+}
+
+/* ===================== rendering ====================================== */
+let SEL = null, DAYS = [];
+
+function colFor(v){
+  return v >= 9 ? "var(--electric)" : v >= 7 ? "var(--green)"
+       : v >= 5 ? "var(--yellow)"   : v >= 3 ? "var(--orange)" : "var(--red)";
+}
+
+function render(){
+  const app = document.getElementById("app");
+  const day = DAYS.find(d => d.date === SEL) || DAYS[0];
+  if (!day){ app.innerHTML = `<div class="skel">No tide data for this date.</div>`; return; }
+
+  const b = day.score == null ? BANDS[BANDS.length-1] : band(day.score);
+  const today = nzNow().date;
+  const label = day.date === today ? "Today"
+              : day.date === addDays(today,1) ? "Tomorrow"
+              : `${dowOf(day.date)} ${+day.date.slice(8)}/${+day.date.slice(5,7)}`;
+  const i = DAYS.findIndex(d => d.date === day.date);
+
+  let html = `
+  <section class="hero" style="--glow:${b.bg};--badgeBg:${b.bg};--badgeFg:${b.col};--badgeLine:${b.line};--accent:${b.col}">
+    <div class="heroTop">
+      <span class="heroDay">${label} · ${dowOf(day.date)} ${+day.date.slice(8)} ${["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][+day.date.slice(5,7)-1]}</span>
+      <span class="heroNav">
+        <button class="navBtn" id="prevD" ${i<=0?"disabled":""} aria-label="Previous day">‹</button>
+        <button class="navBtn" id="nextD" ${i>=DAYS.length-1?"disabled":""} aria-label="Next day">›</button>
+      </span>
+    </div>
+    <div class="scoreRow">
+      <span class="score" style="color:${b.col}">${day.score == null ? "—" : day.score.toFixed(1)}</span>
+      <span class="outof">/ 10</span>
+    </div>
+    <div class="verdictBadge">${b.emoji} ${b.label}</div>
+    <div class="quote">
+      <div class="who">Lachie's verdict</div>
+      <p>“${verdict(day)}”</p>
+    </div>
+  </section>`;
+
+  /* --- windows --- */
+  if (day.windows.length){
+    html += `<section class="panel"><div class="panelHead"><h2>Be at the net</h2>
+      <span class="hint">${legalHours(day.date).from/60}am–${legalHours(day.date).to/60-12}pm legal</span></div>`;
+    day.windows.slice().sort((a,b)=>a.start-b.start).forEach(w => {
+      const wb = band(w.score);
+      const best = w === day.best;
+      html += `<div class="win ${best?"best":""}" style="--accent:${wb.col}">
+        <div class="winScore" style="color:${wb.col}">${w.score.toFixed(1)}<small>/10</small></div>
+        <div class="winBody">
+          <div class="winTime">${hhmm(w.start)} – ${hhmm(w.end)}</div>
+          <div class="winMeta">High water ${hhmm(w.htMin)} · ${w.htH.toFixed(1)} m · ${w.range.toFixed(1)} m range</div>
+        </div>
+        ${best && day.windows.length>1 ? `<span class="winTag" style="background:${wb.bg};color:${wb.col}">Pick</span>` : ""}
+      </div>`;
+    });
+    html += `</section>`;
+  } else {
+    html += `<section class="panel"><div class="empty">No high tide falls inside legal fishing hours on this day.</div></section>`;
+  }
+
+  /* --- factors --- */
+  const w = day.best;
+  if (w){
+    html += `<section class="panel"><div class="panelHead"><h2>The breakdown</h2>
+      <span class="hint">best window</span></div>`;
+    FACTORS.forEach(ft => {
+      const v = w.f[ft.k];
+      if (v == null){
+        html += `<div class="fac"><div class="facIcon">${ft.icon}</div>
+          <div><div class="facName">${ft.name}</div><div class="facNote">no data — needs signal</div></div>
+          <div class="facVal" style="color:var(--mute2)">–</div></div>`;
+        return;
+      }
+      html += `<div class="fac"><div class="facIcon">${ft.icon}</div>
+        <div>
+          <div class="facName">${ft.name}</div>
+          <div class="facNote">${w.notes[ft.k] || ""}</div>
+          <div class="facBarWrap"><div class="facBar" style="width:${v*10}%;background:${colFor(v)}"></div></div>
+        </div>
+        <div class="facVal" style="color:${colFor(v)}">${v.toFixed(1)}<small>/10</small></div></div>`;
+    });
+    w.pen.forEach(p => { html += `<div class="penalty"><b>−${p.n}</b> &nbsp;${p.why}</div>`; });
+    html += `</section>`;
+  }
+
+  /* --- outlook --- */
+  html += `<section class="panel"><div class="panelHead"><h2>Next 8 days</h2><span class="hint">tap a day</span></div>
+    <div class="strip" id="strip">`;
+  DAYS.forEach(d => {
+    const db = d.score == null ? BANDS[4] : band(d.score);
+    html += `<div class="dayCard ${d.date===day.date?"sel":""} ${inSeason(d.date)?"":"out"}" data-d="${d.date}">
+      <div class="dcDow">${d.date===today?"Today":dowOf(d.date)}</div>
+      <div class="dcDate">${+d.date.slice(8)}/${+d.date.slice(5,7)}</div>
+      <div class="dcScore" style="color:${db.col}">${d.score==null?"—":d.score.toFixed(1)}</div>
+      <div class="dcBar"><i style="width:${d.score==null?0:d.score*10}%;background:${db.col}"></i></div>
+      <div class="dcTime">${d.best?hhmm(d.best.htMin):"–"}</div>
+    </div>`;
+  });
+  html += `</div></section>`;
+
+  app.innerHTML = html;
+
+  document.getElementById("prevD")?.addEventListener("click", () => { SEL = DAYS[i-1].date; render(); });
+  document.getElementById("nextD")?.addEventListener("click", () => { SEL = DAYS[i+1].date; render(); });
+  document.querySelectorAll(".dayCard").forEach(el =>
+    el.addEventListener("click", () => { SEL = el.dataset.d; render(); window.scrollTo({top:0,behavior:"smooth"}); }));
+}
+
+function renderStatus(){
+  const el = document.getElementById("status");
+  if (DATA_MODE === "live"){
+    el.className = "status";
+    el.innerHTML = `<span>✓ Live data · updated ${hhmm(nzNow().min)}</span> <button id="refresh">refresh</button>`;
+  } else if (DATA_MODE === "cached"){
+    const hrs = Math.round((Date.now() - WX.fetchedAt)/36e5);
+    el.className = "status warn";
+    el.innerHTML = `<span>⚠ No signal — using weather saved ${hrs<1?"under an hour":hrs+" h"} ago</span> <button id="refresh">try again</button>`;
+  } else if (DATA_MODE === "tideonly"){
+    el.className = "status warn";
+    el.innerHTML = `<span>⚠ No signal and nothing saved — tide and moon only. Rain, river and sea are missing, so the score is partial.</span> <button id="refresh">try again</button>`;
+  } else {
+    el.className = "status"; el.textContent = "Fetching rain, river and swell…";
+  }
+  document.getElementById("refresh")?.addEventListener("click", boot);
+}
+
+function renderSeason(){
+  const t = nzNow().date, y = +t.slice(0,4);
+  const el = document.getElementById("season"), tx = document.getElementById("seasonTxt");
+  if (inSeason(t)){
+    const left = dayDiff(`${y}-10-30`, t);
+    el.className = "season open";
+    tx.textContent = `Season open · ${left} day${left===1?"":"s"} left`;
+  } else {
+    el.className = "season shut";
+    const nextOpen = (+t.slice(5,7) > 10) ? `${y+1}-09-01` : `${y}-09-01`;
+    tx.textContent = `Season shut · opens in ${dayDiff(nextOpen, t)} days`;
+  }
+}
+
+/* ===================== the book (catch log) =========================== */
+const CATCH = [
+  { v:0, em:"🚫", t:"Nothing"      },
+  { v:1, em:"🤏", t:"A few"        },
+  { v:2, em:"🍳", t:"A feed"       },
+  { v:3, em:"😀", t:"Good run"     },
+  { v:4, em:"🚨", t:"Bloody good"  }
+];
+let catchSel = 2;
+
+const readLog  = () => { try { return JSON.parse(localStorage.getItem(LOG_KEY) || "[]"); } catch(e){ return []; } };
+const writeLog = l  => { try { localStorage.setItem(LOG_KEY, JSON.stringify(l)); } catch(e){ alert("Couldn't save — storage is full or blocked."); } };
+
+function renderCatchBtns(){
+  document.getElementById("catchBtns").innerHTML = CATCH.map(c =>
+    `<div class="cb ${c.v===catchSel?"on":""}" data-v="${c.v}"><span class="em">${c.em}</span>${c.t}</div>`).join("");
+  document.querySelectorAll(".cb").forEach(el =>
+    el.addEventListener("click", () => { catchSel = +el.dataset.v; renderCatchBtns(); }));
+}
+
+function renderLog(){
+  const log = readLog().sort((a,b) => b.date.localeCompare(a.date));
+  document.getElementById("logCount").textContent = log.length ? `${log.length} session${log.length===1?"":"s"}` : "";
+  const el = document.getElementById("logList");
+  if (!log.length){
+    el.innerHTML = `<div class="empty">Nothing written down yet.<br>Log a few sessions and the Index starts checking itself against what actually came out of the river.</div>`;
+    return;
+  }
+  el.innerHTML = log.map(e => {
+    const c = CATCH[e.catch] || CATCH[0];
+    return `<div class="entry">
+      <div class="entryEm">${c.em}</div>
+      <div class="entryBody">
+        <div class="entryTop"><span>${dowOf(e.date)} ${+e.date.slice(8)}/${+e.date.slice(5,7)}/${e.date.slice(2,4)} · ${c.t}</span>
+          <span style="color:${e.score==null?"var(--mute2)":colFor(e.score)}">${e.score==null?"—":e.score.toFixed(1)}</span></div>
+        <div class="entryMeta">${e.score==null ? "no index recorded" : `Index said ${e.score.toFixed(1)}${e.htMin!=null?` · high water ${hhmm(e.htMin)}`:""}`}</div>
+        ${e.note ? `<div class="entryNote">“${escapeHtml(e.note)}”</div>` : ""}
+      </div>
+      <button class="del" data-id="${e.id}" title="Delete">✕</button>
+    </div>`;
+  }).join("");
+  document.querySelectorAll(".del").forEach(b => b.addEventListener("click", () => {
+    if (!confirm("Delete this entry?")) return;
+    writeLog(readLog().filter(x => x.id !== b.dataset.id));
+    renderLog(); renderCalibration();
+  }));
+}
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+function saveEntry(){
+  const date = document.getElementById("lgDate").value;
+  if (!date) return alert("Pick the day you fished.");
+  const d = DAYS.find(x => x.date === date);
+  const w = d && d.best;
+  const entry = {
+    id: String(Date.now()),
+    date, catch: catchSel,
+    note: document.getElementById("lgNote").value.trim().slice(0,400),
+    score: d && d.score != null ? d.score : null,
+    htMin: w ? w.htMin : null,
+    f: w ? {...w.f} : null
+  };
+  const log = readLog().filter(x => x.date !== date);   // one entry per day
+  log.push(entry);
+  writeLog(log);
+  document.getElementById("lgNote").value = "";
+  renderLog(); renderCalibration();
+}
+
+/* ===================== calibration ==================================== */
+function renderCalibration(){
+  const el = document.getElementById("calPanel");
+  const log = readLog().filter(e => e.score != null);
+  if (log.length < 4){
+    el.innerHTML = `<div class="panelHead"><h2>Does it actually work?</h2></div>
+      <div class="empty">Needs ${4-log.length} more logged session${4-log.length===1?"":"s"} with a score attached.<br>
+      Then this panel starts grading the Index against the real thing.</div>`;
+    return;
+  }
+
+  // Mean index score for each catch grade actually recorded.
+  const byGrade = CATCH.map(c => {
+    const rows = log.filter(e => e.catch === c.v);
+    return { ...c, n:rows.length, avg: rows.length ? mean(rows.map(e => e.score)) : null };
+  }).filter(g => g.n);
+
+  let html = `<div class="panelHead"><h2>Does it actually work?</h2><span class="hint">${log.length} sessions</span></div>
+    <div class="hint" style="margin-bottom:9px">What the Index said, averaged by what you actually caught.</div>`;
+  byGrade.forEach(g => {
+    html += `<div class="calRow">
+      <span class="calLabel">${g.em} ${g.t}</span>
+      <span class="calBarWrap"><span class="calBar" style="width:${g.avg*10}%;background:${colFor(g.avg)}"></span></span>
+      <span class="calNum" style="color:${colFor(g.avg)}">${g.avg.toFixed(1)}<span style="color:var(--mute2);font-weight:400"> ×${g.n}</span></span>
+    </div>`;
+  });
+
+  // Rank correlation between predicted score and actual catch.
+  const rho = spearman(log.map(e => e.score), log.map(e => e.catch));
+  const quality = rho == null ? null
+    : rho > .6 ? "calling it well" : rho > .3 ? "roughly on the money"
+    : rho > 0  ? "only loosely tracking" : "not tracking at all yet";
+
+  // Which factor best separates good days from poor ones?
+  const good = log.filter(e => e.catch >= 2 && e.f), poor = log.filter(e => e.catch <= 1 && e.f);
+  let sep = null;
+  if (good.length >= 2 && poor.length >= 2){
+    sep = FACTORS.map(ft => {
+      const g = mean(good.map(e => e.f[ft.k]).filter(v => v != null));
+      const p = mean(poor.map(e => e.f[ft.k]).filter(v => v != null));
+      return (g == null || p == null) ? null : { ...ft, gap:g-p, g, p };
+    }).filter(Boolean).sort((a,b) => Math.abs(b.gap) - Math.abs(a.gap))[0];
+  }
+
+  html += `<div class="insight">`;
+  if (quality) html += `Across ${log.length} sessions the Index is <b>${quality}</b> (rank correlation ${rho.toFixed(2)}).`;
+  if (sep && Math.abs(sep.gap) > 0.8){
+    html += ` Your better days have separated most on <b>${sep.name}</b> — ${sep.g.toFixed(1)} on the good ones against ${sep.p.toFixed(1)} on the quiet ones.`;
+    if (sep.gap < 0) html += ` Which is backwards from what the Index assumes, so that's worth arguing about.`;
+  } else if (good.length < 2 || poor.length < 2){
+    html += ` Log a few more of both good and quiet days and it'll start telling you which factor really matters at the Waita.`;
+  }
+  html += `</div>`;
+  el.innerHTML = html;
+}
+
+function spearman(a, b){
+  const n = a.length; if (n < 3) return null;
+  const rank = arr => {
+    const s = arr.map((v,i) => [v,i]).sort((x,y) => x[0]-y[0]);
+    const r = new Array(n);
+    let i = 0;
+    while (i < n){                                   // average ties
+      let j = i; while (j+1 < n && s[j+1][0] === s[i][0]) j++;
+      const avg = (i + j)/2 + 1;
+      for (let k = i; k <= j; k++) r[s[k][1]] = avg;
+      i = j+1;
+    }
+    return r;
+  };
+  const ra = rank(a), rb = rank(b);
+  const ma = mean(ra), mb = mean(rb);
+  let num = 0, da = 0, db = 0;
+  for (let i = 0; i < n; i++){
+    const x = ra[i]-ma, y = rb[i]-mb;
+    num += x*y; da += x*x; db += y*y;
+  }
+  return (da && db) ? num/Math.sqrt(da*db) : null;
+}
+
+/* ===================== boot =========================================== */
+function rebuild(){
+  const today = nzNow().date;
+  DAYS = [];
+  for (let i = 0; i < 8; i++){
+    const d = addDays(today, i);
+    if (TIDES.map.has(d)) DAYS.push(scoreDay(d));
+  }
+  if (!SEL || !DAYS.some(d => d.date === SEL)) SEL = today;
+  renderSeason(); render(); renderStatus();
+}
+
+async function boot(){
+  // Paint from the saved weather first so the page is useful the instant it
+  // opens, then quietly upgrade to live if there is any signal going.
+  if (!WX){
+    const cached = loadCache();
+    if (cached){ WX = cached; DATA_MODE = "cached"; rebuild(); }
+  }
+  if (DATA_MODE !== "cached"){ DATA_MODE = "loading"; renderStatus(); }
+
+  try {
+    WX = await loadWeather();
+    DATA_MODE = "live";
+    saveCache();
+  } catch(e){
+    if (!WX) WX = loadCache();
+    DATA_MODE = WX ? "cached" : "tideonly";
+  }
+  rebuild(); renderLog(); renderCalibration();
+}
+
+document.getElementById("weightsTxt").textContent =
+  "Weights: " + FACTORS.map(f => `${f.name} ${Math.round(W[f.k]*100)}%`).join(", ") +
+  ". Penalties: flood −3, drought −2, dangerous sea −2.";
+
+document.getElementById("lgDate").value = nzNow().date;
+renderCatchBtns();
+document.getElementById("lgSave").addEventListener("click", saveEntry);
+document.getElementById("lgExport").addEventListener("click", () => {
+  const blob = new Blob([JSON.stringify(readLog(), null, 2)], {type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `lachie-index-book-${nzNow().date}.json`;
+  a.click(); URL.revokeObjectURL(a.href);
+});
+document.getElementById("lgImport").addEventListener("click", () => {
+  const inp = document.createElement("input");
+  inp.type = "file"; inp.accept = "application/json,.json";
+  inp.onchange = () => {
+    const fr = new FileReader();
+    fr.onload = () => {
+      try {
+        const rows = JSON.parse(fr.result);
+        if (!Array.isArray(rows)) throw 0;
+        const cur = readLog(), seen = new Set(cur.map(x => x.date));
+        rows.forEach(r => { if (r && r.date && !seen.has(r.date)){ cur.push(r); seen.add(r.date); } });
+        writeLog(cur); renderLog(); renderCalibration();
+        alert("Merged " + rows.length + " entries.");
+      } catch(e){ alert("That file doesn't look like a Lachie Index export."); }
+    };
+    fr.readAsText(inp.files[0]);
+  };
+  inp.click();
+});
+
+boot();
+window.addEventListener("online", boot);
+
+/* Offline shell. Only meaningful when served over https (the hosted copy);
+   opening the file straight off disk simply skips it. */
+if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")){
+  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+}
+</script>
+</body>
+</html>
