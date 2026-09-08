@@ -331,6 +331,12 @@ input:focus,textarea:focus{outline:0;border-color:var(--ink)}
 }
 .insight b{font-family:var(--disp);font-weight:800}
 
+.offlineNote{
+  margin-top:12px;padding:13px 15px;border-radius:var(--r2);background:var(--peach);
+  font-size:13px;line-height:1.5;font-weight:500
+}
+.offlineNote b{font-family:var(--disp);font-weight:800}
+
 /* ---------- status / footer ---------- */
 .status{
   display:flex;align-items:center;gap:9px;justify-content:center;flex-wrap:wrap;
@@ -407,6 +413,7 @@ details summary{cursor:pointer;color:var(--ink);font-size:13.5px;padding:7px 0;f
 <div id="app"><div class="skel">Reading the river…</div></div>
 
 <div class="status" id="status"></div>
+<div class="offlineNote" id="offlineNote" hidden></div>
 
 <!-- ============ CATCH LOG ============ -->
 <section class="panel">
@@ -1248,6 +1255,38 @@ function renderSeason(){
   }
 }
 
+/* ===================== offline readiness =============================
+   The whole hut promise rests on a service worker holding the page. Not
+   every browser grants one — third-party browsers on iOS in particular
+   have historically not had them — and failing silently would mean finding
+   out at the river with no signal. So check, and say so if it is missing.
+   ====================================================================== */
+async function offlineReady(){
+  if (location.protocol === "file:") return { ok:true, skip:true };   // local copy
+  if (!("serviceWorker" in navigator)) return { ok:false, why:"this browser can't store the app for offline use" };
+  try {
+    const regs = await navigator.serviceWorker.getRegistrations();
+    if (!regs.length) return { ok:false, why:"the offline copy hasn't been saved yet" };
+    for (const k of await caches.keys()){
+      const c = await caches.open(k);
+      if (await c.match("./index.html")) return { ok:true };
+    }
+    return { ok:false, why:"the offline copy is incomplete" };
+  } catch(e){ return { ok:false, why:"offline storage is blocked in this browser" }; }
+}
+
+async function renderOffline(){
+  const el = document.getElementById("offlineNote");
+  if (!el) return;
+  const r = await offlineReady();
+  if (r.ok || r.skip){ el.hidden = true; return; }
+  el.hidden = false;
+  el.innerHTML = `<b>Heads up —</b> ${r.why}, so at the hut with no signal this page won't open at all.
+    Tides and moon are stored inside it, but only if the app itself loads.
+    On an iPhone, opening it in <b>Safari</b> and choosing <b>Add to Home Screen</b> is the one that
+    works without coverage.`;
+}
+
 /* ===================== theme ==========================================
    Auto follows actual darkness at the Waita, not the phone's setting — the
    whole point is 5am, when it is pitch black outside whatever iOS thinks.
@@ -1468,6 +1507,7 @@ async function boot(){
     DATA_MODE = WX ? "cached" : "tideonly";
   }
   rebuild(); renderLog(); renderCalibration();
+  setTimeout(renderOffline, 4000);
 }
 
 document.getElementById("weightsTxt").textContent =
@@ -1544,6 +1584,8 @@ if (/[?&]debug/.test(location.search)){
       "minmax(0,1fr):      " + sup("grid-template-columns","repeat(2,minmax(0,1fr))"),
       "overflow-wrap any:  " + sup("overflow-wrap","anywhere"),
       "custom prop var():  " + sup("color","var(--ink)"),
+      "serviceWorker API: " + (("serviceWorker" in navigator) ? "present" : "ABSENT"),
+      "sw registrations: " + (navigator.serviceWorker ? "(async — see below)" : "n/a"),
       "data mode: " + DATA_MODE + "   score: " + (DAYS[0] ? DAYS[0].score : "-")
     ];
     box.textContent = L.join("\n");
@@ -1556,6 +1598,12 @@ if (/[?&]debug/.test(location.search)){
                                              () => b.textContent = "Select the text above and copy it");
     };
     box.appendChild(b);
+    offlineReady().then(r => {
+      const line = document.createElement("div");
+      line.textContent = "offline ready: " + (r.ok ? "YES" + (r.skip ? " (local file)" : "") : "NO — " + r.why);
+      line.setAttribute("style", "margin-top:8px;color:" + (r.ok ? "#0f0" : "#ff6"));
+      box.insertBefore(line, b);
+    });
   };
   setTimeout(read, 1200);
   setTimeout(read, 6000);
