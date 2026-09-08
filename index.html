@@ -252,6 +252,14 @@ header{padding:26px 0 14px}
 }
 .penalty b{font-family:var(--disp);font-weight:800}
 
+.gauge{
+  display:block;margin-top:11px;padding:12px 14px;border-radius:var(--r2);
+  background:var(--sand);color:var(--ink);text-decoration:none;
+  font-size:12.5px;line-height:1.5;font-weight:500
+}
+.gauge:hover{background:var(--mint)}
+.gauge b{font-family:var(--disp);font-weight:800}
+
 /* ---------- outlook ---------- */
 .strip{display:flex;gap:9px;overflow-x:auto;padding:2px 0 8px;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
 .dayCard{
@@ -1201,7 +1209,14 @@ function render(){
       </div>`;
     });
     w.pen.forEach(p => { html += `<div class="penalty"><b>−${p.n}</b> &nbsp;${p.why}</div>`; });
-    html += `</div></section>`;
+    html += `</div>
+      <a class="gauge" href="https://envirodata.wcrc.govt.nz/dashboards/riverlevels/riverlevels.php"
+         target="_blank" rel="noopener">
+        <b>River is modelled, not measured.</b>
+        For a real gauge, check <b>Haast Rv at Roaring Billy</b> on the West Coast Regional Council
+        river levels page — measured level and whether it's rising or falling. Opens in your browser. →
+      </a>
+    </section>`;
   }
 
   /* --- outlook --- */

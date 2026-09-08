@@ -82,12 +82,25 @@ not a gauge in the Waita. Reading it as a ratio against its own 60-day median ma
 "up on normal / settling / raging" signal, which is what the score needs — but it is not a measured
 river height.
 
-There **is** a real flow recorder in the Haast catchment, run by
-[West Coast Regional Council](https://www.wcrc.govt.nz/environment/water/river-levels-rainfall).
-It has no public API and sends no CORS headers, so a browser page cannot read it; their telemetry
-is also flagged as preliminary and not quality-controlled. For quality-assured data the contact is
-`hydrologydata@wcrc.govt.nz`. If that ever became available programmatically it would be a genuine
-accuracy upgrade over GloFAS.
+There **is** a real gauge: **Haast Rv at Roaring Billy (ESNZ)**, published on West Coast Regional
+Council's [river levels dashboard](https://envirodata.wcrc.govt.nz/dashboards/riverlevels/riverlevels.php)
+(the page loads it from `riverlevels/westland.php?district=Westland`). It reports measured level,
+rate of change in mm/h, and flow in m³/s, refreshed roughly 3-hourly.
+
+**It cannot be read from the app.** That endpoint returns `text/html` with **no
+`Access-Control-Allow-Origin` header**, so a browser on another origin is blocked from fetching it —
+checked directly, not assumed. Using it would need a server-side fetch, which this project
+deliberately doesn't have. Their telemetry is also flagged as preliminary and not quality-controlled;
+quality-assured data comes from `hydrologydata@wcrc.govt.nz`.
+
+So the app **links to it instead** — one tap from the breakdown panel — and is explicit that its own
+river figure is modelled.
+
+**A worked cross-check (8 Sep 2026, evening).** The gauge read **1.503 m, falling at −5 mm/h,
+180.5 m³/s**. The app's GloFAS-derived figure for the same evening was **1.92× normal and steady**.
+Different catchments and wildly different absolute numbers — Haast drains 1356 km², the Waita is a
+fraction of that — but both independently said *up and settling*, which is the read the score
+actually depends on.
 
 ### 4. The weights — an opinion, not a measurement
 
