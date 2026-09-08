@@ -101,7 +101,10 @@ Also worth re-checking the Haast offset in LINZ's secondary ports table
 (`https://static.charts.linz.govt.nz/tide-tables/sec-ports/westport.pdf`) in case it's revised.
 
 `index.html` is generated — **edit `build/lachie.template.html`, not `index.html`.**
-Bump `CACHE` in `sw.js` when you deploy so phones pick the new version up.
+
+The page is served network-first by the service worker, so a deploy reaches phones on the next
+load without any cache juggling. Only bump `CACHE` in `sw.js` if you change an **asset** (an icon,
+the manifest), since those are cache-first.
 
 Icons: `python make_icons.py ..`
 

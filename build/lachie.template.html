@@ -123,6 +123,29 @@ header{padding:26px 0 14px}
   padding:5px 11px;border-radius:999px;flex:none;background:var(--ink);color:var(--cream)
 }
 
+/* ---------- out there ---------- */
+.outMain{
+  display:flex;align-items:center;gap:16px;padding:16px 18px;
+  background:var(--sky);border-radius:var(--r2);margin-bottom:10px
+}
+.outIcon{font-size:46px;line-height:1;flex:none}
+.outBody{flex:1;min-width:0}
+.outCond{font-family:var(--disp);font-size:21px;font-weight:800;letter-spacing:-.025em}
+.outTemp{font-family:var(--disp);font-size:34px;font-weight:800;letter-spacing:-.045em;line-height:1.05;margin-top:2px}
+.outTemp span{font-family:var(--body);font-size:13px;font-weight:600;opacity:.6;margin-left:8px;letter-spacing:0}
+.outGrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.outCell{background:var(--sand);border-radius:var(--r3);padding:11px 13px}
+.outCell b{display:block;font-family:var(--disp);font-size:16px;font-weight:800;letter-spacing:-.025em}
+.outCell span{display:block;font-size:11px;color:var(--ink2);margin-top:2px;font-weight:600}
+.outNote{
+  margin-top:10px;padding:13px 15px;border-radius:var(--r2);
+  background:var(--mint);font-size:14.5px;font-weight:600;line-height:1.45
+}
+.outTension{
+  margin-top:9px;padding:12px 15px;border-radius:var(--r2);background:var(--butter);
+  font-family:var(--serif);font-style:italic;font-size:16px;line-height:1.4
+}
+
 /* ---------- factor tiles ---------- */
 .facGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .fac{background:var(--tile);border-radius:var(--r2);padding:15px 15px 16px;cursor:default}
@@ -154,7 +177,12 @@ header{padding:26px 0 14px}
 .dcScore{font-family:var(--disp);font-size:25px;font-weight:800;margin:7px 0 5px;letter-spacing:-.045em;font-variant-numeric:tabular-nums}
 .dcBar{height:4px;border-radius:99px;background:rgba(20,18,16,.16);overflow:hidden}
 .dcBar>i{display:block;height:100%;border-radius:99px;background:var(--ink)}
-.dcTime{font-size:10px;opacity:.6;margin-top:6px;font-variant-numeric:tabular-nums;font-weight:700}
+.dcWx{
+  display:flex;align-items:center;justify-content:center;gap:3px;
+  margin-top:7px;font-size:11px;font-weight:800;font-variant-numeric:tabular-nums
+}
+.dcWx span{font-size:13px}
+.dcTime{font-size:10px;opacity:.6;margin-top:4px;font-variant-numeric:tabular-nums;font-weight:700}
 
 /* ---------- forms / log ---------- */
 .field{margin-bottom:14px}
@@ -292,6 +320,12 @@ details summary{cursor:pointer;color:var(--ink);font-size:13.5px;padding:7px 0;f
     read as a ratio against the median of its own last 60 observed days rather than as an absolute
     level, so it measures “up on normal for this river” instead of a number nobody can eyeball.
     <b>Swell and sea</b> — Open-Meteo marine API. <b>Moon</b> — computed in this page.
+  </p>
+  <p>
+    <b>“Out there” is not part of the score.</b> The Weather factor rates a dull, damp day highly
+    because that is what suits the bait. Whether it is pleasant to stand in for three hours is the
+    opposite question, so it is reported separately — conditions, real and felt temperature, rain
+    and wind through the fishing window — and never folded into the number.
   </p>
   <details>
     <summary>How the score is built</summary>
@@ -468,7 +502,7 @@ async function loadWeather(){
   // The weather feed is essential; river and sea are each optional, so one
   // endpoint being down degrades a single factor instead of the whole page.
   const [wx, fl, mar] = await Promise.allSettled([
-    getJSON(`https://api.open-meteo.com/v1/forecast?${q}&hourly=precipitation,cloud_cover,wind_speed_10m,wind_direction_10m,temperature_2m&past_days=10&forecast_days=8&timezone=Pacific%2FAuckland`),
+    getJSON(`https://api.open-meteo.com/v1/forecast?${q}&hourly=precipitation,cloud_cover,wind_speed_10m,wind_direction_10m,temperature_2m,apparent_temperature,weather_code,wind_gusts_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,sunrise,sunset&past_days=10&forecast_days=8&timezone=Pacific%2FAuckland`),
     getJSON(`https://flood-api.open-meteo.com/v1/flood?${q}&daily=river_discharge&past_days=60&forecast_days=8`),
     getJSON(`https://marine-api.open-meteo.com/v1/marine?${q}&hourly=wave_height,swell_wave_height&past_days=2&forecast_days=8&timezone=Pacific%2FAuckland`)
   ]);
@@ -495,13 +529,43 @@ function packWeather(wx, fl, mar){
     riverBase = median(past.length >= 10 ? past : [...riverByDate.values()]);
   }
 
+  // Whole-day summary, for the outlook strip and the "out there" panel.
+  const dayWx = new Map();
+  if (wx.daily){
+    wx.daily.time.forEach((d,i) => dayWx.set(d, {
+      code: wx.daily.weather_code[i],
+      tmax: wx.daily.temperature_2m_max[i],
+      tmin: wx.daily.temperature_2m_min[i],
+      rain: wx.daily.precipitation_sum[i],
+      sunrise: (wx.daily.sunrise[i] || "").slice(11),
+      sunset:  (wx.daily.sunset[i]  || "").slice(11)
+    }));
+  }
+
   return {
-    idx, h, seaIdx, mar,
+    idx, h, seaIdx, mar, dayWx,
     riverByDate, riverBase,
     fetchedAt: Date.now(),
     raw: { wx, fl, mar }
   };
 }
+
+/* WMO weather codes → something a person can read. */
+const WMO = {
+  0:["☀️","Clear"], 1:["🌤️","Mostly clear"], 2:["⛅","Partly cloudy"], 3:["☁️","Overcast"],
+  45:["🌫️","Fog"], 48:["🌫️","Freezing fog"],
+  51:["🌦️","Light drizzle"], 53:["🌦️","Drizzle"], 55:["🌧️","Heavy drizzle"],
+  56:["🌧️","Freezing drizzle"], 57:["🌧️","Freezing drizzle"],
+  61:["🌦️","Light rain"], 63:["🌧️","Rain"], 65:["🌧️","Heavy rain"],
+  66:["🌧️","Freezing rain"], 67:["🌧️","Freezing rain"],
+  71:["🌨️","Light snow"], 73:["🌨️","Snow"], 75:["❄️","Heavy snow"], 77:["🌨️","Snow grains"],
+  80:["🌦️","Showers"], 81:["🌧️","Heavy showers"], 82:["⛈️","Torrential showers"],
+  85:["🌨️","Snow showers"], 86:["🌨️","Snow showers"],
+  95:["⛈️","Thunderstorm"], 96:["⛈️","Thunder and hail"], 99:["⛈️","Thunder and hail"]
+};
+const wmo = c => WMO[c] || ["🌥️","—"];
+const COMPASS = ["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW"];
+const compass = deg => COMPASS[Math.round((((deg % 360) + 360) % 360) / 22.5) % 16];
 
 function saveCache(){
   try { localStorage.setItem(CACHE_KEY, JSON.stringify({ at:WX.fetchedAt, raw:WX.raw })); } catch(e){}
@@ -519,7 +583,7 @@ function loadCache(){
 /* Aggregate hourly values across an inclusive-exclusive minute window. */
 function hourSlice(date, fromMin, toMin){
   if (!WX) return null;
-  const vals = { rain:0, cloud:[], wind:[], gustDir:[], temp:[], n:0 };
+  const vals = { rain:0, cloud:[], wind:[], gustDir:[], temp:[], feels:[], gust:[], code:[], n:0 };
   for (let m = Math.floor(fromMin/60)*60; m < toMin; m += 60){
     const d = addDays(date, Math.floor(m/1440));
     const hr = ((m % 1440) + 1440) % 1440 / 60;
@@ -530,6 +594,9 @@ function hourSlice(date, fromMin, toMin){
     if (WX.h.wind_speed_10m[i] != null) vals.wind.push(WX.h.wind_speed_10m[i]);
     if (WX.h.wind_direction_10m[i] != null) vals.gustDir.push(WX.h.wind_direction_10m[i]);
     if (WX.h.temperature_2m[i] != null) vals.temp.push(WX.h.temperature_2m[i]);
+    if (WX.h.apparent_temperature && WX.h.apparent_temperature[i] != null) vals.feels.push(WX.h.apparent_temperature[i]);
+    if (WX.h.wind_gusts_10m && WX.h.wind_gusts_10m[i] != null) vals.gust.push(WX.h.wind_gusts_10m[i]);
+    if (WX.h.weather_code && WX.h.weather_code[i] != null) vals.code.push(WX.h.weather_code[i]);
     vals.n++;
   }
   return vals.n ? vals : null;
@@ -650,6 +717,29 @@ function scoreWindow(date, ht){
   f.moon = clamp(2 + 8*Math.pow(mn.springiness, 1.3), 0, 10);
   notes.moon = `${mn.glyph} ${mn.name} · ${Math.round(mn.illum*100)}% lit`;
 
+  /* --- what it is actually like to stand there ----------------------- */
+  // Deliberately NOT scored. The Weather factor rates dull-and-wet highly
+  // because that is what the bait like; this is the opposite question.
+  let out = null;
+  if (win){
+    const t  = mean(win.temp);
+    const fl = win.feels.length ? mean(win.feels) : t;
+    const wind = win.wind.length ? Math.max(...win.wind) : null;
+    const gust = win.gust.length ? Math.max(...win.gust) : null;
+    const dir  = win.gustDir.length ? mean(win.gustDir) : null;
+    out = {
+      code: win.code.length ? Math.max(...win.code) : null,
+      temp:t, feels:fl, rain:win.rain, wind, gust,
+      dir: dir != null ? compass(dir) : null,
+      comfort: comfortRead(fl, win.rain, wind, gust)
+    };
+    const dull = f.cloud != null && f.cloud >= 8;
+    if (dull && fl != null && fl < 8)
+      out.tension = "Perfect bait weather. Miserable for you. That's the deal.";
+    else if (f.cloud != null && f.cloud <= 4 && fl != null && fl >= 12)
+      out.tension = "Lovely day for standing in a river. Bait'll be tight to the bank, mind.";
+  }
+
   /* --- combine ------------------------------------------------------- */
   let wsum = 0, tot = 0;
   for (const k in W) if (f[k] != null){ tot += f[k]*W[k]; wsum += W[k]; }
@@ -660,10 +750,32 @@ function scoreWindow(date, ht){
 
   return {
     date, start, end, htMin:ht.min, htH:ht.h, range,
-    f, notes, pen, moon:mn,
+    f, notes, pen, moon:mn, out,
     score: round1(score),
     complete: wsum > 0.99
   };
+}
+
+/* Plain-language read on standing in it for three hours at dawn. */
+function comfortRead(feels, rain, wind, gust){
+  if (feels == null) return null;
+  const head = feels < 2  ? "Bloody freezing"
+             : feels < 6  ? "Cold"
+             : feels < 10 ? "Chilly"
+             : feels < 15 ? "Mild"
+             :              "Pleasant";
+  const bits = [];
+  if (rain > 8)        bits.push("and properly wet");
+  else if (rain > 1.5) bits.push("and damp");
+  else if (rain > 0.2) bits.push("with a bit of spit in the air");
+  if (gust != null && gust > 60)      bits.push("with a real wind on it");
+  else if (wind != null && wind > 35) bits.push("and breezy");
+  const kit = feels < 4  ? "Thermals and the good parka."
+            : rain > 5   ? "Full wet weather gear."
+            : rain > 1   ? "Take the raincoat."
+            : feels < 9  ? "Take a jacket."
+            :              "You'll be right in a jumper.";
+  return { head, line: [head, ...bits].join(" ") + ". " + kit };
 }
 
 function scoreDay(date){
@@ -790,6 +902,31 @@ function render(){
     html += `<section class="panel"><div class="empty">No high tide falls inside legal fishing hours on this day.</div></section>`;
   }
 
+  /* --- what it's like out there --- */
+  const dw = WX && WX.dayWx ? WX.dayWx.get(day.date) : null;
+  if (day.best && day.best.out){
+    const o = day.best.out;
+    const [em, txt] = wmo(o.code);
+    html += `<section class="panel"><div class="panelHead"><h2>Out there</h2>
+      <span class="hint">${hhmm(day.best.start)}–${hhmm(day.best.end)}</span></div>
+      <div class="outMain">
+        <div class="outIcon">${em}</div>
+        <div class="outBody">
+          <div class="outCond">${txt}</div>
+          <div class="outTemp">${o.temp==null?"–":Math.round(o.temp)}°<span>feels ${o.feels==null?"–":Math.round(o.feels)}°</span></div>
+        </div>
+      </div>
+      <div class="outGrid">
+        <div class="outCell"><b>${o.rain.toFixed(1)} mm</b><span>rain in the window</span></div>
+        <div class="outCell"><b>${o.wind==null?"–":Math.round(o.wind)} km/h${o.dir?" "+o.dir:""}</b><span>${o.gust!=null?`gusting ${Math.round(o.gust)}`:"wind"}</span></div>
+        ${dw ? `<div class="outCell"><b>${dw.tmin==null?"–":Math.round(dw.tmin)}° / ${dw.tmax==null?"–":Math.round(dw.tmax)}°</b><span>day low / high</span></div>
+        <div class="outCell"><b>${dw.sunrise||"–"}</b><span>sunrise · sets ${dw.sunset||"–"}</span></div>` : ""}
+      </div>
+      ${o.comfort ? `<div class="outNote">${o.comfort.line}</div>` : ""}
+      ${o.tension ? `<div class="outTension">${o.tension}</div>` : ""}
+    </section>`;
+  }
+
   /* --- factors --- */
   const w = day.best;
   if (w){
@@ -821,11 +958,13 @@ function render(){
     <div class="strip" id="strip">`;
   DAYS.forEach(d => {
     const db = d.score == null ? BANDS[4] : band(d.score);
+    const w2 = WX && WX.dayWx ? WX.dayWx.get(d.date) : null;
     html += `<div class="dayCard ${d.date===day.date?"sel":""} ${inSeason(d.date)?"":"out"}" data-d="${d.date}" style="--tone:${db.col}">
       <div class="dcDow">${d.date===today?"Today":dowOf(d.date)}</div>
       <div class="dcDate">${+d.date.slice(8)}/${+d.date.slice(5,7)}</div>
       <div class="dcScore">${d.score==null?"—":d.score.toFixed(1)}</div>
       <div class="dcBar"><i style="width:${d.score==null?0:d.score*10}%"></i></div>
+      ${w2 ? `<div class="dcWx"><span>${wmo(w2.code)[0]}</span>${w2.tmax==null?"":Math.round(w2.tmax)+"°"}</div>` : ""}
       <div class="dcTime">${d.best?hhmm(d.best.htMin):"–"}</div>
     </div>`;
   });
