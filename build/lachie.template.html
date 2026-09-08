@@ -355,6 +355,8 @@ input:focus,textarea:focus{outline:0;border-color:var(--ink)}
 }
 .icX:hover{background:var(--ink);color:var(--cream)}
 
+.installCard.warn{background:var(--peach)}
+
 /* ---------- status / footer ---------- */
 .status{
   display:flex;align-items:center;gap:9px;justify-content:center;flex-wrap:wrap;
@@ -387,6 +389,25 @@ details summary{cursor:pointer;color:var(--ink);font-size:13.5px;padding:7px 0;f
   .outIcon{font-size:38px}
   .outTemp{font-size:29px}
   .outCell b{font-size:15px}
+}
+
+/* A page-zoomed phone lands here. Stack rather than crush: it should look
+   deliberate while zoomed, not broken. */
+@media (max-width:340px){
+  .brand{font-size:26px} .place{font-size:17px} .score{font-size:60px}
+  .panelHead h2{font-size:20px} .panel{padding:16px}
+  .facGrid{grid-template-columns:1fr}
+  .facNote{min-height:0}
+  .outGrid{grid-template-columns:1fr}
+  .outIcon{font-size:32px} .outTemp{font-size:25px} .outCond{font-size:17px}
+  .catchBtns{gap:4px}
+  .cb{font-size:8.5px;padding:9px 1px}
+  .cb .em{font-size:14px}
+  .winScore{width:46px;font-size:22px}
+  .winTime{font-size:18px}
+  .lrScore{padding:4px 8px;font-size:13px}
+  .calLabel{width:78px;font-size:11.5px}
+  .themeBtn{padding:7px 10px;font-size:11px}
 }
 </style>
 </head>
@@ -438,6 +459,7 @@ window.addEventListener("beforeinstallprompt", function(e){
   <div class="season" id="season"><span class="dot"></span><span id="seasonTxt">…</span></div>
 </header>
 
+<div class="installCard warn" id="zoomNote" hidden></div>
 <div class="installCard" id="installCard" hidden></div>
 
 <div id="app"><div class="skel">Reading the river…</div></div>
@@ -1285,6 +1307,56 @@ function renderSeason(){
   }
 }
 
+/* ===================== page-zoom detection ===========================
+   No CSS can undo a browser page-zoom setting, and it should not be able
+   to — it is an accessibility control. But it can be *detected* and named,
+   which beats the owner guessing why everything looks oversized.
+
+   On iOS, screen.width stays fixed in CSS pixels while innerWidth shrinks
+   as page zoom rises, so the ratio between them gives the zoom level.
+   Safari's global Page Zoom (Settings → Apps → Safari → Page Zoom) is
+   inherited by home-screen web apps, which is why an installed app can
+   open zoomed while Chrome — with its own separate zoom — looks right.
+   ====================================================================== */
+function zoomLevel(){
+  try {
+    if (window.top !== window.self) return null;          // embedded: ratio is meaningless
+    const sw = window.screen && window.screen.width, iw = window.innerWidth;
+    if (!sw || !iw || sw >= 900) return null;              // phones only
+    if (!navigator.maxTouchPoints) return null;
+    if (window.innerHeight < window.innerWidth) return null; // portrait only
+    const ratio = iw / sw;
+    if (ratio > 0 && ratio < 0.9) return Math.round(100 / ratio);
+    return null;
+  } catch(e){ return null; }
+}
+
+function renderZoom(){
+  const el = document.getElementById("zoomNote");
+  if (!el) return;
+  const z = zoomLevel();
+  if (!z){ el.hidden = true; return; }
+  const ua = navigator.userAgent;
+  const iOS = /iPad|iPhone|iPod/.test(ua)
+           || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  el.hidden = false;
+  el.innerHTML = `<div class="icTitle">This browser is zoomed to about ${z}%</div>
+    <p>That's why everything looks oversized — the page is being magnified, so less of it
+    fits on screen. Nothing in the app can override it; it's a browser setting.</p>`
+    + (iOS
+      ? `<p><b>To fix it:</b></p><ol>
+           <li><b>Settings → Apps → Safari → Page Zoom</b> — set <b>All Websites</b> to <b>100%</b></li>
+           <li>In Safari on the page, tap <b>ᴀA</b> in the address bar and set that site to <b>100%</b> too</li>
+           <li>If it's already on the home screen, <b>delete the icon and add it again</b> —
+             an installed app keeps the zoom it was created with</li>
+         </ol>`
+      : `<p><b>To fix it:</b> in your browser's menu, set zoom back to <b>100%</b>.</p>`)
+    + `<button class="icX" id="zX" title="Hide">✕</button>`;
+  const b = document.getElementById("zX");
+  if (b) b.addEventListener("click", () => { el.hidden = true; });
+}
+window.addEventListener("resize", () => { clearTimeout(window.__zt); window.__zt = setTimeout(renderZoom, 400); });
+
 /* ===================== install helper ================================
    "Add to Home Screen" hides in different places per browser, and in an
    in-app browser (a link tapped inside Messenger, WhatsApp, Gmail and so
@@ -1621,7 +1693,7 @@ async function boot(){
     DATA_MODE = WX ? "cached" : "tideonly";
   }
   rebuild(); renderLog(); renderCalibration();
-  renderInstall();
+  renderZoom(); renderInstall();
   setTimeout(renderOffline, 4000);
 }
 
@@ -1699,6 +1771,9 @@ if (/[?&]debug/.test(location.search)){
       "minmax(0,1fr):      " + sup("grid-template-columns","repeat(2,minmax(0,1fr))"),
       "overflow-wrap any:  " + sup("overflow-wrap","anywhere"),
       "custom prop var():  " + sup("color","var(--ink)"),
+      "screen.width: " + (window.screen && window.screen.width) +
+        "   innerWidth: " + window.innerWidth +
+        "   => page zoom: " + (zoomLevel() ? zoomLevel() + "% ZOOMED" : "100% (normal)"),
       "serviceWorker API: " + (("serviceWorker" in navigator) ? "present" : "ABSENT"),
       "sw registrations: " + (navigator.serviceWorker ? "(async — see below)" : "n/a"),
       "data mode: " + DATA_MODE + "   score: " + (DAYS[0] ? DAYS[0].score : "-")
