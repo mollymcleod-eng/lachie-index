@@ -196,6 +196,12 @@ header{padding:26px 0 14px}
   padding:5px 11px;border-radius:999px;flex:none;background:var(--ink);color:var(--cream)
 }
 
+.skipNote{
+  margin-top:10px;padding:11px 13px;border-radius:var(--r3);background:var(--sand);
+  font-size:12px;line-height:1.5;color:var(--ink2);font-weight:500
+}
+.skipNote b{font-family:var(--disp);font-weight:800;color:var(--ink)}
+
 /* ---------- out there ---------- */
 .outMain{
   display:flex;align-items:center;gap:16px;padding:16px 18px;
@@ -1080,10 +1086,20 @@ function comfortRead(feels, rain, wind, gust){
 }
 
 function scoreDay(date){
-  const wins = highTides(date).map(ht => scoreWindow(date, ht)).filter(Boolean);
-  if (!wins.length) return { date, windows:[], score:null };
+  const lh = legalHours(date);
+  const wins = [], skipped = [];
+  highTides(date).forEach(ht => {
+    const w = scoreWindow(date, ht);
+    if (w){ wins.push(w); return; }
+    // Keep the ones we threw away, with why. A day showing a single card and no
+    // explanation reads like the app missed a tide.
+    const s = Math.max(ht.min - 180, lh.from);
+    const e = Math.min(ht.min + 30,  lh.to);
+    skipped.push({ htMin: ht.min, htH: ht.h, usable: Math.max(0, e - s) });
+  });
+  if (!wins.length) return { date, windows:[], skipped, score:null };
   wins.sort((a,b) => b.score - a.score);
-  return { date, windows:wins, best:wins[0], score:wins[0].score };
+  return { date, windows:wins, skipped, best:wins[0], score:wins[0].score };
 }
 
 /* ===================== Lachie's verdict =============================== */
@@ -1213,6 +1229,18 @@ function render(){
         ${best && day.windows.length>1 ? `<span class="winTag">Pick</span>` : ""}
       </div>`;
     });
+    // Explain the tides that exist but can't legally be fished, so a one-card
+    // day doesn't look like a missing card.
+    const sk = day.skipped || [];
+    if (sk.length){
+      const lh2 = legalHours(day.date);
+      const close = `${lh2.from/60}am–${lh2.to/60-12}pm`;
+      const bits = sk.map(s => s.usable === 0
+        ? `<b>${hhmm(s.htMin)}</b> (${s.htH.toFixed(1)} m) — its run-up falls outside the ${close} rule`
+        : `<b>${hhmm(s.htMin)}</b> (${s.htH.toFixed(1)} m) — only ${s.usable} min of it is inside legal hours`);
+      html += `<div class="skipNote">${day.windows.length === 1 ? "Only one fishable tide today." : ""}
+        The other high water ${sk.length > 1 ? "s are" : "is"} ${bits.join("; ")}. Nothing missing — just not legal water.</div>`;
+    }
     html += `</section>`;
   } else {
     html += `<section class="panel"><div class="empty">No high tide falls inside legal fishing hours on this day.</div></section>`;
