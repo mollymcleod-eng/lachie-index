@@ -171,7 +171,26 @@ header{padding:26px 0 14px}
 .winScore small{display:block;font-size:9.5px;font-weight:700;letter-spacing:.08em;opacity:.5;font-family:var(--body);margin-top:3px}
 .winBody{flex:1;min-width:0}
 .winTime{font-family:var(--disp);font-size:21px;font-weight:800;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
-.winMeta{font-size:12.5px;color:var(--ink2);margin-top:3px;font-weight:500}
+.winPrime{
+  font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.09em;
+  color:var(--ink2);margin-top:1px
+}
+.winBar{
+  position:relative;display:block;height:7px;margin:9px 0 7px;
+  background:var(--track);border-radius:99px;overflow:hidden
+}
+.wbPrime{position:absolute;top:0;bottom:0;background:var(--ink);border-radius:99px}
+.wbHW{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--hotpink);border-radius:2px}
+.wbNow{position:absolute;top:-3px;bottom:-3px;width:3px;background:var(--electric);border-radius:2px;
+  box-shadow:0 0 0 2px var(--cream)}
+.winMeta{font-size:11.5px;color:var(--ink2);margin-top:3px;font-weight:500;line-height:1.45}
+.winNow{
+  margin-top:7px;padding:6px 11px;border-radius:999px;display:inline-block;
+  font-size:11.5px;font-weight:800;letter-spacing:.02em;background:var(--scrim)
+}
+.winNow.prime{background:var(--ink);color:var(--cream)}
+.winNow.early{background:var(--butter);color:var(--ink)}
+.winNow.late,.winNow.over{background:var(--coral);color:var(--ink)}
 .winTag{
   font-size:10px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;
   padding:5px 11px;border-radius:999px;flex:none;background:var(--ink);color:var(--cream)
@@ -834,6 +853,14 @@ function scoreWindow(date, ht){
   const usable = end - start;
   if (usable < 60) return null;                  // not enough legal water to bother
 
+  // The prime stretch. The whole 3½ hours is fishable, but the run concentrates
+  // in the last of the push toward high water — DOC's point that juveniles move
+  // upstream on the incoming, and the reason a 9-scoring day can still look dead
+  // at the start of its own window. Marked separately so the app stops implying
+  // all 210 minutes are equal.
+  const primeStart = Math.max(start, ht.min - 90);
+  const primeEnd   = Math.min(end,   ht.min + 30);
+
   const f = {}, notes = {}, pen = [];
 
   /* --- TIDE: range drives how hard the water pushes upriver ---------- */
@@ -956,11 +983,26 @@ function scoreWindow(date, ht){
   score = clamp(score - penTotal, 0, 10);
 
   return {
-    date, start, end, htMin:ht.min, htH:ht.h, range,
+    date, start, end, primeStart, primeEnd, htMin:ht.min, htH:ht.h, range,
     f, notes, pen, moon:mn, out,
     score: round1(score),
     complete: wsum > 0.99
   };
+}
+
+/* Where the clock sits against a window, for someone holding the phone at the
+   net. Returns null for any day that isn't today. */
+function windowPhase(w){
+  if (w.date !== nzNow().date) return null;
+  const now = nzNow().min;
+  if (now < w.start - 60)  return null;
+  if (now < w.start)       return { tone:"soon",  text:`Window opens in ${w.start - now} min` };
+  if (now < w.primeStart)  return { tone:"early", text:`In the window — prime starts in ${w.primeStart - now} min` };
+  if (now <= w.primeEnd)   return { tone:"prime", text: now <= w.htMin
+                                     ? `PRIME — high water in ${w.htMin - now} min`
+                                     : `PRIME — ${w.primeEnd - now} min left` };
+  if (now <= w.end)        return { tone:"late",  text:`Prime's gone — ${w.end - now} min of legal water left` };
+  return { tone:"over", text:"That window's done" };
 }
 
 /* =====================================================================
@@ -1147,11 +1189,26 @@ function render(){
     day.windows.slice().sort((a,b)=>a.start-b.start).forEach(w => {
       const wb = band(w.score);
       const best = w === day.best;
+      const ph = windowPhase(w);
+      // Bar showing where the prime stretch sits inside the whole window.
+      const span = w.end - w.start;
+      const pL = ((w.primeStart - w.start) / span * 100).toFixed(1);
+      const pW = ((w.primeEnd - w.primeStart) / span * 100).toFixed(1);
+      const hwL = ((w.htMin - w.start) / span * 100).toFixed(1);
+      const nowMin = nzNow().min;
+      const showNow = w.date === nzNow().date && nowMin >= w.start && nowMin <= w.end;
       html += `<div class="win ${best?"best":""}" style="--tone:${wb.col}">
         <div class="winScore">${w.score.toFixed(1)}<small>/10</small></div>
         <div class="winBody">
-          <div class="winTime">${hhmm(w.start)} – ${hhmm(w.end)}</div>
-          <div class="winMeta">High water ${hhmm(w.htMin)} · ${w.htH.toFixed(1)} m · ${w.range.toFixed(1)} m range</div>
+          <div class="winTime">${hhmm(w.primeStart)} – ${hhmm(w.primeEnd)}</div>
+          <div class="winPrime">Prime — the last of the push</div>
+          <div class="winBar">
+            <span class="wbPrime" style="left:${pL}%;width:${pW}%"></span>
+            <span class="wbHW" style="left:${hwL}%"></span>
+            ${showNow ? `<span class="wbNow" style="left:${((nowMin-w.start)/span*100).toFixed(1)}%"></span>` : ""}
+          </div>
+          <div class="winMeta">Fishable ${hhmm(w.start)}–${hhmm(w.end)} · high water ${hhmm(w.htMin)} · ${w.htH.toFixed(1)} m · ${w.range.toFixed(1)} m range</div>
+          ${ph ? `<div class="winNow ${ph.tone}">${ph.text}</div>` : ""}
         </div>
         ${best && day.windows.length>1 ? `<span class="winTag">Pick</span>` : ""}
       </div>`;
@@ -1781,6 +1838,18 @@ window.addEventListener("pageshow", e => { if (e.persisted) maybeRefresh(); });
 window.addEventListener("focus", maybeRefresh);
 // Catches midnight rolling over while the app sits open at the hut.
 setInterval(() => { if (BUILT_DATE !== nzNow().date) boot(); }, 10*60*1000);
+
+// The "prime starts in N min" line has to stay true while he's standing there,
+// so re-render when the phase label would actually change — not on a timer that
+// repaints for nothing.
+let LAST_PHASE = null;
+setInterval(() => {
+  const d = DAYS.find(x => x.date === SEL);
+  if (!d || !d.best) return;
+  const ph = windowPhase(d.best);
+  const key = ph ? ph.tone + "|" + ph.text : "none";
+  if (key !== LAST_PHASE){ LAST_PHASE = key; render(); }
+}, 60*1000);
 
 /* ---------------------------------------------------------------------
    Diagnostics — open the page with ?debug on the end of the URL.
