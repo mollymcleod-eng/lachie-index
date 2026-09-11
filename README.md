@@ -118,7 +118,42 @@ it says so. At that point the weights should change to match the river, and the 
 Each **high tide** is scored separately over a window running from 3 hours before high water
 through to 30 minutes after, clipped to legal fishing hours. The day takes its best window.
 
-Weighted: Tide 30%, Fresh 20%, River 20%, Weather 10%, Wind/Sea 10%, Moon 10%.
+Weighted: Tide 30%, Fresh 20%, River 20%, **Wind/Sea 15%**, Weather 10%, **Moon 5%**.
+
+### First calibration, 11 Sep 2026 — the sea
+
+The Index called 11 September a **9.2, CODE WHITEBAIT**. Lachie fished it and got **ten whitebait**.
+His read: *the sea was too high.*
+
+The model had scored the sea **4.6** — its weakest factor by far — but at 10% weight that cost the
+day only half a point. Worse, it was measuring the sea **wrongly**:
+
+| | Wave | Period | Swell | Wind-wave |
+|---|---|---|---|---|
+| Thu 10 Sep | 2.74 m | 9.0 s | 1.8 m | 1.3 m |
+| **Fri 11 Sep** | 2.86 m | **12.3 s** | **2.66 m** | **0.1 m** |
+
+Near-identical wave height, completely different sea — messy chop versus a clean 12-second
+groundswell. Energy at a bar goes roughly as **height² × period**, so 11 Sep carried about **2.6×**
+the energy at the same nominal height. Scoring on height alone could not tell them apart.
+
+**Three changes:**
+
+1. **The sea is scored on swell energy** (height² × period), not wave height. Raw height is only the
+   fallback when period is unavailable.
+2. **A second, lower penalty** — *the mouth won't fish* (−1.5, rising to −2.5 when blown out) —
+   distinct from the existing *this is dangerous* penalty. The danger line sat at 3.5 m; the bar
+   stops fishing well long before that, and nothing scored it.
+3. **Sea 10% → 15%, moon 10% → 5%.** The five points come off the moon because it largely
+   double-counts the tide: spring tides *are* the moon effect, and tide range already measures it
+   directly. So it is a redundancy correction as much as a response to one session.
+
+11 Sep rescores **9.2 → 7.0**; 12 Sep, with 3.4 m of 11-second swell, goes **5.0 → 1.7**. Days with
+calm seas are unchanged or slightly higher, so the change discriminates rather than just deflating.
+
+**This is a hypothesis, not a finding — n = 1.** If heavy-swell days keep blanking, the penalty
+should go up again. If a big-swell day produces a cracker, it should come back down. The Book is
+what settles it.
 
 Penalties come off the total afterwards, so one genuinely bad factor sinks an otherwise tidy day:
 flood **−3**, drought **−2**, dangerous mouth **−2**.

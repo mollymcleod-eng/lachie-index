@@ -596,7 +596,14 @@ const SITE = { lat: -43.7826, lon: 169.1174 };
 const TIDE_RAW = __TIDE_DATA__;
 
 /* --- scoring weights (sum to 1) -------------------------------------- */
-const W = { tide:.30, fresh:.20, river:.20, cloud:.10, moon:.10, sea:.10 };
+/* Weights. Sea went .10 → .15 and moon .10 → .05 on 11 Sep 2026, after a 9.2
+   day at the Waita produced ten whitebait and Lachie's own read was "sea too
+   high". The 5 points come off the moon because the moon is largely double-
+   counting the tide — spring tides ARE the moon effect, and tide range already
+   measures it directly — so this is a redundancy correction as much as a
+   response to one session. Still a hypothesis: n=1, and The Book is what
+   settles it. */
+const W = { tide:.30, fresh:.20, river:.20, cloud:.10, sea:.15, moon:.05 };
 const FACTORS = [
   { k:"tide",  icon:"🌊", name:"Tide",        tile:"var(--sky)"    },
   { k:"fresh", icon:"🌧️", name:"Fresh",       tile:"var(--lav)"    },
@@ -736,7 +743,7 @@ async function loadWeather(){
   const [wx, fl, mar] = await Promise.allSettled([
     getJSON(`https://api.open-meteo.com/v1/forecast?${q}&hourly=precipitation,cloud_cover,wind_speed_10m,wind_direction_10m,temperature_2m,apparent_temperature,weather_code,wind_gusts_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,sunrise,sunset&past_days=10&forecast_days=16&timezone=Pacific%2FAuckland`),
     getJSON(`https://flood-api.open-meteo.com/v1/flood?${q}&daily=river_discharge&past_days=60&forecast_days=16`),
-    getJSON(`https://marine-api.open-meteo.com/v1/marine?${q}&hourly=wave_height,swell_wave_height&past_days=2&forecast_days=16&timezone=Pacific%2FAuckland`)
+    getJSON(`https://marine-api.open-meteo.com/v1/marine?${q}&hourly=wave_height,swell_wave_height,swell_wave_period,wave_period,wind_wave_height&past_days=2&forecast_days=16&timezone=Pacific%2FAuckland`)
   ]);
   if (wx.status !== "fulfilled") throw wx.reason;
   const ok = r => r.status === "fulfilled" ? r.value : null;
@@ -835,17 +842,30 @@ function hourSlice(date, fromMin, toMin){
 }
 function seaSlice(date, fromMin, toMin){
   if (!WX || !WX.mar) return null;
-  const wav = [], swl = [];
+  const H = WX.mar.hourly;
+  const wav = [], swl = [], per = [], wwv = [];
   for (let m = Math.floor(fromMin/60)*60; m < toMin; m += 60){
     const d = addDays(date, Math.floor(m/1440));
     const hr = ((m % 1440) + 1440) % 1440 / 60;
     const i = WX.seaIdx.get(`${d}T${pad(hr)}:00`);
     if (i == null) continue;
-    const a = WX.mar.hourly.wave_height[i], b = WX.mar.hourly.swell_wave_height[i];
-    if (a != null) wav.push(a);
-    if (b != null) swl.push(b);
+    if (H.wave_height[i] != null) wav.push(H.wave_height[i]);
+    if (H.swell_wave_height[i] != null) swl.push(H.swell_wave_height[i]);
+    if (H.swell_wave_period && H.swell_wave_period[i] != null) per.push(H.swell_wave_period[i]);
+    if (H.wind_wave_height && H.wind_wave_height[i] != null) wwv.push(H.wind_wave_height[i]);
   }
-  return wav.length ? { wave:Math.max(...wav), swell: swl.length ? Math.max(...swl) : null } : null;
+  if (!wav.length) return null;
+  const swell = swl.length ? Math.max(...swl) : null;
+  const period = per.length ? mean(per) : null;
+  // Energy at the bar goes roughly as height² × period. A 2.7 m twelve-second
+  // groundswell is a different animal from 2.7 m of nine-second slop, and
+  // height alone cannot tell them apart — which is exactly how an 11 Sep sea
+  // scored 4.6 while the mouth was, in Lachie's words, too high to fish.
+  const energy = (swell != null && period != null) ? swell*swell*period : null;
+  return {
+    wave: Math.max(...wav), swell, period, energy,
+    windWave: wwv.length ? Math.max(...wwv) : null
+  };
 }
 const mean = a => a.length ? a.reduce((x,y)=>x+y,0)/a.length : null;
 
@@ -938,7 +958,13 @@ function scoreWindow(date, ht){
     const wind = win ? Math.max(...win.wind) : null;
     const wave = sea ? sea.wave : null;
     let s = 10;
-    if (wave != null) s = Math.min(s, piece(wave, [[0.8,10],[1.5,8.5],[2.2,6.5],[3,4],[3.8,1.5],[5,0]]));
+    // Swell energy is the real measure at a bar mouth; fall back to raw height
+    // only when period is unavailable.
+    if (sea && sea.energy != null){
+      s = Math.min(s, piece(sea.energy, [[10,10],[25,8.5],[40,6.5],[55,4.5],[70,3],[90,1.5],[120,0]]));
+    } else if (wave != null){
+      s = Math.min(s, piece(wave, [[0.8,10],[1.5,8.5],[2.2,6.5],[3,4],[3.8,1.5],[5,0]]));
+    }
     if (wind != null) s = Math.min(s, piece(wind, [[10,10],[22,8.5],[32,6],[45,3],[60,0]]));
     // Onshore westerlies stand the bar up.
     if (win && wind != null && wind > 25){
@@ -946,8 +972,19 @@ function scoreWindow(date, ht){
       if (dir != null && dir > 215 && dir < 325) s -= 1.2;
     }
     f.sea = clamp(s, 0, 10);
-    notes.sea = [ wind!=null ? `${Math.round(wind)} km/h wind` : null,
-                  wave!=null ? `${wave.toFixed(1)} m sea` : null ].filter(Boolean).join(" · ");
+    notes.sea = [ wave!=null ? `${wave.toFixed(1)} m sea` : null,
+                  (sea && sea.period != null) ? `${sea.period.toFixed(0)} s swell` : null,
+                  wind!=null ? `${Math.round(wind)} km/h wind` : null ].filter(Boolean).join(" · ");
+
+    // Two different thresholds, deliberately. One is "you could get hurt".
+    // The other is "the bait cannot get through the mouth" — which bites at a
+    // far lower sea than the danger line, and used to go entirely unscored.
+    if (sea && sea.energy != null && sea.energy >= 55){
+      pen.push({ n: sea.energy >= 85 ? 2.5 : 1.5,
+                 why: sea.energy >= 85
+                   ? `Mouth's blown out — ${sea.swell.toFixed(1)} m of ${sea.period.toFixed(0)}s swell on the bar`
+                   : `Heavy swell on the bar — ${sea.swell.toFixed(1)} m at ${sea.period.toFixed(0)}s, mouth won't fish well` });
+    }
     if ((wave != null && wave >= 3.5) || (wind != null && wind >= 50))
       pen.push({ n:2, why:"Rough out there — mouth could be genuinely dangerous" });
   }
@@ -1806,7 +1843,9 @@ async function boot(){
 
 document.getElementById("weightsTxt").textContent =
   "Weights: " + FACTORS.map(f => `${f.name} ${Math.round(W[f.k]*100)}%`).join(", ") +
-  ". Penalties: flood −3, drought −2, dangerous sea −2.";
+  ". Penalties: flood −3, drought −2, dangerous sea −2, heavy swell on the bar −1.5 (−2.5 blown out). "
+  + "The sea is scored on swell energy (height² × period), not wave height — a 2.7 m twelve-second "
+  + "groundswell hits the bar far harder than 2.7 m of nine-second slop, and height alone can't tell them apart.";
 
 document.getElementById("lgDate").value = nzNow().date;
 renderCatchBtns();
